@@ -2,38 +2,42 @@
 // and efficient error handling.
 package microerror
 
-import (
-	"fmt"
-
-	"github.com/juju/errgo"
-)
-
 var (
-	// MaskAny is a simple error masker. Masked errors act as tracers within the
-	// source code. Inspecting an masked error shows where the error was passed
-	// through within the code base. This is gold for debugging and bug huntin.
-	MaskAny = errgo.MaskFunc(errgo.Any)
+	handler Handler = NewErrgoHandler(ErrgoHandlerConfig{
+		CallDepth: 1,
+	})
 )
 
-// MaskAnyf is like MaskAny. In addition to that it takes a format string and
-// variadic arguments like fmt.Sprintf. The format string and variadic arguments
-// are used to annotate the given errgo error.
-func MaskAnyf(err error, f string, v ...interface{}) error {
-	if err == nil {
-		return nil
-	}
-
-	f = fmt.Sprintf("%s: %s", err.Error(), f)
-	newErr := errgo.WithCausef(nil, errgo.Cause(err), f, v...)
-	newErr.(*errgo.Err).SetLocation(1)
-
-	return newErr
+// New returns a new error with the given error message. It is a drop-in
+// replacement for errors.New from the standard library.
+func New(s string) error {
+	return handler.New(s)
 }
 
-// PanicOnError panics in case the given error is not nil. Otherwise it will do
-// nothing.
-func PanicOnError(err error) {
-	if err != nil {
-		panic(err)
-	}
+// Newf returns a new error with the given printf-formatted error message.
+func Newf(f string, v ...interface{}) error {
+	return handler.Newf(f, v...)
+}
+
+// Cause returns the cause of the given error. If the cause of the err can not
+// be found it returns the err itself.
+//
+// Cause is the usual way to diagnose errors that may have been wrapped by Mask
+// or Maskf.
+func Cause(err error) error {
+	return handler.Cause(err)
+}
+
+// Mask is a simple error masker. Masked errors act as tracers within the
+// source code. Inspecting an masked error shows where the error was passed
+// through within the code base. This is gold for debugging and bug hunting.
+func Mask(err error) error {
+	return handler.Mask(err)
+}
+
+// Maskf is like Mask. In addition to that it takes a format string and
+// variadic arguments like fmt.Sprintf. The format string and variadic
+// arguments are used to annotate the given errgo error.
+func Maskf(err error, f string, v ...interface{}) error {
+	return handler.Maskf(err, f, v...)
 }
