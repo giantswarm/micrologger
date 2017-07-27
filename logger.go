@@ -41,10 +41,10 @@ func DefaultConfig() Config {
 func New(config Config) (Logger, error) {
 	// Settings.
 	if config.Caller == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "caller must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "caller must not be empty")
 	}
 	if config.TimestampFormatter == nil {
-		return nil, microerror.MaskAnyf(invalidConfigError, "timestamp formatter must not be empty")
+		return nil, microerror.Maskf(invalidConfigError, "timestamp formatter must not be empty")
 	}
 
 	kitLogger := kitlog.NewJSONLogger(kitlog.NewSyncWriter(config.IOWriter))
