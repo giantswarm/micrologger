@@ -9,6 +9,6 @@ type Logger interface {
 
 	// With returns a new contextual logger with keyvals appended to those
 	// passed to calls to Log. If logger is also a contextual logger
-	// created by With keyvals is appended to the existing context.
+	// created by With, keyvals is appended to the existing context.
 	With(keyvals ...interface{}) Logger
 }
