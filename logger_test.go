@@ -19,7 +19,7 @@ func TestWith(t *testing.T) {
 		}
 		log, err = New(c)
 		if err != nil {
-			panic(err)
+			t.Fatalf("setting up logger: %#v", err)
 		}
 	}
 
@@ -41,6 +41,8 @@ func TestWith(t *testing.T) {
 		var got map[string]string
 		json.Unmarshal(out.Bytes(), &got)
 
+		// NOTE: this tests also a line number, it may chagne if lines
+		// are modified in this file.
 		wcaller := "github.com/giantswarm/micrologger/logger_test.go:39"
 		caller, ok := got["caller"]
 		if !ok {
@@ -67,7 +69,9 @@ func TestWith(t *testing.T) {
 		var got map[string]string
 		json.Unmarshal(out.Bytes(), &got)
 
-		wcaller := "github.com/giantswarm/micrologger/logger_test.go:65"
+		// NOTE: this tests also a line number, it may chagne if lines
+		// are modified in this file.
+		wcaller := "github.com/giantswarm/micrologger/logger_test.go:67"
 		caller, ok := got["caller"]
 		if !ok {
 			t.Errorf("expected caller key")
