@@ -72,7 +72,7 @@ func (l *logger) Log(keyVals ...interface{}) error {
 }
 
 func (l *logger) LogCtx(ctx context.Context, keyVals ...interface{}) error {
-	container, ok := loggermeta.FromContext(ctx)
+	meta, ok := loggermeta.FromContext(ctx)
 	if !ok {
 		return l.Logger.Log(keyVals...)
 	}
@@ -81,7 +81,7 @@ func (l *logger) LogCtx(ctx context.Context, keyVals ...interface{}) error {
 	{
 		newKeyVals = append(newKeyVals, keyVals...)
 
-		for k, v := range container.KeyVals {
+		for k, v := range meta.KeyVals {
 			newKeyVals = append(newKeyVals, k)
 			newKeyVals = append(newKeyVals, v)
 		}

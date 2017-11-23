@@ -53,10 +53,10 @@ func Test_Logger_LogWithCtx(t *testing.T) {
 
 	var ctx context.Context
 	{
-		logCtx := loggermeta.New()
-		logCtx.KeyVals["baz"] = "zap"
+		meta := loggermeta.New()
+		meta.KeyVals["baz"] = "zap"
 
-		ctx = loggermeta.NewContext(context.Background(), logCtx)
+		ctx = loggermeta.NewContext(context.Background(), meta)
 	}
 
 	{
