@@ -71,7 +71,7 @@ func (l *logger) Log(keyVals ...interface{}) error {
 	return l.Logger.Log(keyVals...)
 }
 
-func (l *logger) LogWithCtx(ctx context.Context, keyVals ...interface{}) error {
+func (l *logger) LogCtx(ctx context.Context, keyVals ...interface{}) error {
 	container, ok := loggercontext.FromContext(ctx)
 	if !ok {
 		return l.Logger.Log(keyVals...)

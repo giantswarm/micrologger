@@ -15,24 +15,22 @@ type key string
 // key directly.
 var loggerKey key = "logger"
 
-// Container is a communication structure used to transport information in order
+// LoggerContext is a communication structure used to transport information in order
 // for a micro logger to use it when issuing logs.
-type Container struct {
+type LoggerContext struct {
 	// KeyVals is a mapping of key-value pairs a micro logger adds to the log
 	// message issuance.
 	KeyVals map[string]string
 }
 
-// NewContainer returns a new communication structure used to apply to a
-// context.
-func NewContainer() *Container {
-	return &Container{
+func New() *LoggerContext {
+	return &LoggerContext{
 		KeyVals: map[string]string{},
 	}
 }
 
 // NewContext returns a new context.Context that carries value v.
-func NewContext(ctx context.Context, v *Container) context.Context {
+func NewContext(ctx context.Context, v *LoggerContext) context.Context {
 	if v == nil {
 		return ctx
 	}
@@ -41,7 +39,7 @@ func NewContext(ctx context.Context, v *Container) context.Context {
 }
 
 // FromContext returns the logger struct, if any.
-func FromContext(ctx context.Context) (*Container, bool) {
-	v, ok := ctx.Value(loggerKey).(*Container)
+func FromContext(ctx context.Context) (*LoggerContext, bool) {
+	v, ok := ctx.Value(loggerKey).(*LoggerContext)
 	return v, ok
 }
