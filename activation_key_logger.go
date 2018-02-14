@@ -6,7 +6,7 @@ import (
 	"github.com/giantswarm/microerror"
 )
 
-type ActivationKeyConfig struct {
+type ActivationKeyLoggerConfig struct {
 	Underlying Logger
 
 	ActivationKeys []string
@@ -18,7 +18,7 @@ type activationKeyLogger struct {
 	activationKeys []string
 }
 
-func NewActivationKey(config ActivationKeyConfig) (Logger, error) {
+func NewActivationKey(config ActivationKeyLoggerConfig) (Logger, error) {
 	if config.Underlying == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Underlying must not be empty", config)
 	}
@@ -33,7 +33,7 @@ func NewActivationKey(config ActivationKeyConfig) (Logger, error) {
 }
 
 func (l *activationKeyLogger) Log(keyVals ...interface{}) error {
-	activated, err := shouldActivate(l.activationKeys, keyVals...)
+	activated, err := shouldActivate(l.activationKeys, keyVals)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -46,7 +46,7 @@ func (l *activationKeyLogger) Log(keyVals ...interface{}) error {
 }
 
 func (l *activationKeyLogger) LogCtx(ctx context.Context, keyVals ...interface{}) error {
-	activated, err := shouldActivate(l.activationKeys, keyVals...)
+	activated, err := shouldActivate(l.activationKeys, keyVals)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -62,7 +62,23 @@ func (l *activationKeyLogger) With(keyVals ...interface{}) Logger {
 	return l.underlying.With(keyVals...)
 }
 
-// TODO implement properly.
-func shouldActivate(activationKeys []string, keyVals ...interface{}) (bool, error) {
+func shouldActivate(activationKeys []string, keyVals []interface{}) (bool, error) {
+	for _, k := range activationKeys {
+		if containsString(keyVals, k) {
+			return true, nil
+		}
+	}
+
 	return false, nil
+}
+
+func containsString(list []interface{}, key string) bool {
+	for _, v := range list {
+		s, ok := v.(string)
+		if ok && s == key {
+			return true
+		}
+	}
+
+	return false
 }
