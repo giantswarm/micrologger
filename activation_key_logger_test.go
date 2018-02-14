@@ -107,6 +107,148 @@ func Test_ActivationKeyLogger_shouldActivate(t *testing.T) {
 			},
 			ExpectedResult: true,
 		},
+
+		// Case 8, activation keys matching values of the keyVals result in false,
+		// because we only want to activate on matching keys.
+		{
+			ActivationKeys: []string{
+				"val",
+			},
+			KeyVals: []interface{}{
+				"key",
+				"val",
+			},
+			ExpectedResult: false,
+		},
+
+		// Case 9, activation keys matching keys of the keyVals still result in true
+		// even if values match as well.
+		{
+			ActivationKeys: []string{
+				"key",
+				"val",
+			},
+			KeyVals: []interface{}{
+				"key",
+				"val",
+				"val",
+				"key",
+			},
+			ExpectedResult: true,
+		},
+
+		// Case 10, activation keys must all match in order to result in true.
+		{
+			ActivationKeys: []string{
+				"foo",
+				"bar",
+				"baz",
+			},
+			KeyVals: []interface{}{
+				"foo",
+				"val",
+				"bar",
+				"val",
+				"baz",
+				"val",
+			},
+			ExpectedResult: true,
+		},
+
+		// Case 11, not all activation keys matching results in false.
+		{
+			ActivationKeys: []string{
+				"foo",
+				"bar",
+				"baz",
+			},
+			KeyVals: []interface{}{
+				"foo",
+				"val",
+				"bar",
+				"val",
+				"notmatching",
+				"val",
+			},
+			ExpectedResult: false,
+		},
+
+		// Case 12, activation keys representing common log levels result in true
+		// when matching.
+		{
+			ActivationKeys: []string{
+				"info",
+			},
+			KeyVals: []interface{}{
+				"test",
+				3,
+				"info",
+				"val",
+			},
+			ExpectedResult: true,
+		},
+
+		// Case 13, same as 12 but with a different log level.
+		{
+			ActivationKeys: []string{
+				"error",
+			},
+			KeyVals: []interface{}{
+				"test",
+				3,
+				"error",
+				"val",
+			},
+			ExpectedResult: true,
+		},
+
+		// Case 14, activation keys representing common log levels result in true
+		// when matching lower log levels. The activation key info matches the log
+		// level debug because debug is lower than info.
+		{
+			ActivationKeys: []string{
+				"info",
+			},
+			KeyVals: []interface{}{
+				"test",
+				3,
+				"debug",
+				"val",
+			},
+			ExpectedResult: true,
+		},
+
+		// Case 15, activation keys representing common log levels result in false
+		// when not matching lower log levels. The activation key info does not
+		// match the log level warn because warn is higher than info.
+		{
+			ActivationKeys: []string{
+				"info",
+			},
+			KeyVals: []interface{}{
+				"test",
+				3,
+				"warn",
+				"val",
+			},
+			ExpectedResult: false,
+		},
+
+		// Case 16, activation keys representing common log levels result in false
+		// when not matching lower log levels. The activation key info does not
+		// match the log level error because error is higher than info.
+		{
+			ActivationKeys: []string{
+				"info",
+			},
+			KeyVals: []interface{}{
+				"test",
+				3,
+				"error",
+				"val",
+			},
+			ExpectedResult: false,
+		},
 	}
 
 	for i, tc := range testCases {
