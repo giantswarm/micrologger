@@ -7,6 +7,10 @@ import (
 )
 
 const (
+	WildCardActivation = "*"
+)
+
+const (
 	levelDebug levelID = 1 << iota
 	levelInfo
 	levelWarn
@@ -24,34 +28,34 @@ var (
 
 type levelID byte
 
-type ActivationKeyLoggerConfig struct {
+type ActivationLoggerConfig struct {
 	Underlying Logger
 
-	ActivationKeys []string
+	Activations map[string]string
 }
 
-type activationKeyLogger struct {
+type activationLogger struct {
 	underlying Logger
 
-	activationKeys []string
+	activations map[string]string
 }
 
-func NewActivationKey(config ActivationKeyLoggerConfig) (Logger, error) {
+func NewActivation(config ActivationLoggerConfig) (Logger, error) {
 	if config.Underlying == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Underlying must not be empty", config)
 	}
 
-	l := &activationKeyLogger{
+	l := &activationLogger{
 		underlying: config.Underlying,
 
-		activationKeys: config.ActivationKeys,
+		activations: config.Activations,
 	}
 
 	return l, nil
 }
 
-func (l *activationKeyLogger) Log(keyVals ...interface{}) error {
-	activated, err := shouldActivate(l.activationKeys, keyVals)
+func (l *activationLogger) Log(keyVals ...interface{}) error {
+	activated, err := shouldActivate(l.activations, keyVals)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -63,8 +67,8 @@ func (l *activationKeyLogger) Log(keyVals ...interface{}) error {
 	return nil
 }
 
-func (l *activationKeyLogger) LogCtx(ctx context.Context, keyVals ...interface{}) error {
-	activated, err := shouldActivate(l.activationKeys, keyVals)
+func (l *activationLogger) LogCtx(ctx context.Context, keyVals ...interface{}) error {
+	activated, err := shouldActivate(l.activations, keyVals)
 	if err != nil {
 		return microerror.Mask(err)
 	}
@@ -76,14 +80,18 @@ func (l *activationKeyLogger) LogCtx(ctx context.Context, keyVals ...interface{}
 	return nil
 }
 
-func (l *activationKeyLogger) With(keyVals ...interface{}) Logger {
+func (l *activationLogger) With(keyVals ...interface{}) Logger {
 	return l.underlying.With(keyVals...)
 }
 
-func containsString(keyVals []interface{}, activationKey string) bool {
+func containsKey(keyVals []interface{}, activation string) bool {
+	if activation == WildCardActivation {
+		return true
+	}
+
 	for i := 0; i < len(keyVals); i += 2 {
 		s, ok := keyVals[i].(string)
-		if ok && s == activationKey {
+		if ok && s == activation {
 			return true
 		}
 	}
@@ -91,8 +99,23 @@ func containsString(keyVals []interface{}, activationKey string) bool {
 	return false
 }
 
-func isLevelAllowed(keyVals []interface{}, activationKey string) bool {
-	activationKeyLevel, ok := levelMapping[activationKey]
+func containsVal(keyVals []interface{}, activation string) bool {
+	if activation == WildCardActivation {
+		return true
+	}
+
+	for i := 1; i < len(keyVals); i += 2 {
+		s, ok := keyVals[i].(string)
+		if ok && s == activation {
+			return true
+		}
+	}
+
+	return false
+}
+
+func isLevelAllowed(keyVals []interface{}, activation string) bool {
+	activationLevel, ok := levelMapping[activation]
 	if !ok {
 		return false
 	}
@@ -107,28 +130,28 @@ func isLevelAllowed(keyVals []interface{}, activationKey string) bool {
 			continue
 		}
 
-		return activationKeyLevel >= keyValsLevel
+		return activationLevel >= keyValsLevel
 	}
 
 	return false
 }
 
-func shouldActivate(activationKeys []string, keyVals []interface{}) (bool, error) {
+func shouldActivate(activations map[string]string, keyVals []interface{}) (bool, error) {
 	var activationCount int
 
-	for _, activationKey := range activationKeys {
-		if containsString(keyVals, activationKey) {
+	for aKey, aVal := range activations {
+		if containsKey(keyVals, aKey) && containsVal(keyVals, aVal) {
 			activationCount++
 			continue
 		}
 
-		if isLevelAllowed(keyVals, activationKey) {
+		if isLevelAllowed(keyVals, aKey) || isLevelAllowed(keyVals, aVal) {
 			activationCount++
 			continue
 		}
 	}
 
-	if len(activationKeys) != 0 && len(activationKeys) == activationCount {
+	if len(activations) != 0 && len(activations) == activationCount {
 		return true, nil
 	}
 

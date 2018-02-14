@@ -6,21 +6,21 @@ import (
 
 func Test_ActivationKeyLogger_shouldActivate(t *testing.T) {
 	testCases := []struct {
-		ActivationKeys []string
+		Activations    map[string]string
 		KeyVals        []interface{}
 		ExpectedResult bool
 	}{
 		// Case 0, zero value input results into false, because logging should not
 		// be activated in case no match exists, even if the input is empty.
 		{
-			ActivationKeys: nil,
+			Activations:    nil,
 			KeyVals:        nil,
 			ExpectedResult: false,
 		},
 
 		// Case 1, same as 0 but with empty lists instead of zero values.
 		{
-			ActivationKeys: []string{},
+			Activations:    map[string]string{},
 			KeyVals:        []interface{}{},
 			ExpectedResult: false,
 		},
@@ -28,8 +28,8 @@ func Test_ActivationKeyLogger_shouldActivate(t *testing.T) {
 		// Case 2, a given activation key not matching any keyVals results into
 		// false.
 		{
-			ActivationKeys: []string{
-				"foo",
+			Activations: map[string]string{
+				"foo": "bar",
 			},
 			KeyVals:        nil,
 			ExpectedResult: false,
@@ -38,11 +38,10 @@ func Test_ActivationKeyLogger_shouldActivate(t *testing.T) {
 		// Case 3, same as 2 but with different activation keys.
 		// false.
 		{
-			ActivationKeys: []string{
-				"foo",
-				"foo",
-				"bar",
-				"baz",
+			Activations: map[string]string{
+				"foo": "bar",
+				"bar": "foo",
+				"baz": "foo",
 			},
 			KeyVals:        nil,
 			ExpectedResult: false,
@@ -50,8 +49,8 @@ func Test_ActivationKeyLogger_shouldActivate(t *testing.T) {
 
 		// Case 4, same as 2 but with given keyVals which still do not match.
 		{
-			ActivationKeys: []string{
-				"foo",
+			Activations: map[string]string{
+				"foo": "bar",
 			},
 			KeyVals: []interface{}{
 				"test",
@@ -64,11 +63,10 @@ func Test_ActivationKeyLogger_shouldActivate(t *testing.T) {
 
 		// Case 5, same as 4 but with different activation keys.
 		{
-			ActivationKeys: []string{
-				"foo",
-				"foo",
-				"bar",
-				"baz",
+			Activations: map[string]string{
+				"foo": "bar",
+				"bar": "foo",
+				"baz": "foo",
 			},
 			KeyVals: []interface{}{
 				"test",
@@ -81,8 +79,8 @@ func Test_ActivationKeyLogger_shouldActivate(t *testing.T) {
 
 		// Case 6, a given activation key matching any keyVals results into true.
 		{
-			ActivationKeys: []string{
-				"test",
+			Activations: map[string]string{
+				"test": "*",
 			},
 			KeyVals: []interface{}{
 				"test",
@@ -95,9 +93,9 @@ func Test_ActivationKeyLogger_shouldActivate(t *testing.T) {
 
 		// Case 7, same as 6 but with different matching activation keys.
 		{
-			ActivationKeys: []string{
-				"test",
-				"key",
+			Activations: map[string]string{
+				"test": "*",
+				"key":  "*",
 			},
 			KeyVals: []interface{}{
 				"test",
@@ -111,8 +109,8 @@ func Test_ActivationKeyLogger_shouldActivate(t *testing.T) {
 		// Case 8, activation keys matching values of the keyVals result in false,
 		// because we only want to activate on matching keys.
 		{
-			ActivationKeys: []string{
-				"val",
+			Activations: map[string]string{
+				"val": "*",
 			},
 			KeyVals: []interface{}{
 				"key",
@@ -124,9 +122,9 @@ func Test_ActivationKeyLogger_shouldActivate(t *testing.T) {
 		// Case 9, activation keys matching keys of the keyVals still result in true
 		// even if values match as well.
 		{
-			ActivationKeys: []string{
-				"key",
-				"val",
+			Activations: map[string]string{
+				"key": "*",
+				"val": "*",
 			},
 			KeyVals: []interface{}{
 				"key",
@@ -139,10 +137,10 @@ func Test_ActivationKeyLogger_shouldActivate(t *testing.T) {
 
 		// Case 10, activation keys must all match in order to result in true.
 		{
-			ActivationKeys: []string{
-				"foo",
-				"bar",
-				"baz",
+			Activations: map[string]string{
+				"foo": "*",
+				"bar": "*",
+				"baz": "*",
 			},
 			KeyVals: []interface{}{
 				"foo",
@@ -157,10 +155,10 @@ func Test_ActivationKeyLogger_shouldActivate(t *testing.T) {
 
 		// Case 11, not all activation keys matching results in false.
 		{
-			ActivationKeys: []string{
-				"foo",
-				"bar",
-				"baz",
+			Activations: map[string]string{
+				"foo": "*",
+				"bar": "*",
+				"baz": "*",
 			},
 			KeyVals: []interface{}{
 				"foo",
@@ -176,8 +174,8 @@ func Test_ActivationKeyLogger_shouldActivate(t *testing.T) {
 		// Case 12, activation keys representing common log levels result in true
 		// when matching.
 		{
-			ActivationKeys: []string{
-				"info",
+			Activations: map[string]string{
+				"info": "*",
 			},
 			KeyVals: []interface{}{
 				"test",
@@ -190,8 +188,8 @@ func Test_ActivationKeyLogger_shouldActivate(t *testing.T) {
 
 		// Case 13, same as 12 but with a different log level.
 		{
-			ActivationKeys: []string{
-				"error",
+			Activations: map[string]string{
+				"error": "*",
 			},
 			KeyVals: []interface{}{
 				"test",
@@ -206,8 +204,8 @@ func Test_ActivationKeyLogger_shouldActivate(t *testing.T) {
 		// when matching lower log levels. The activation key info matches the log
 		// level debug because debug is lower than info.
 		{
-			ActivationKeys: []string{
-				"info",
+			Activations: map[string]string{
+				"info": "*",
 			},
 			KeyVals: []interface{}{
 				"test",
@@ -222,8 +220,8 @@ func Test_ActivationKeyLogger_shouldActivate(t *testing.T) {
 		// when not matching lower log levels. The activation key info does not
 		// match the log level warn because warn is higher than info.
 		{
-			ActivationKeys: []string{
-				"info",
+			Activations: map[string]string{
+				"info": "*",
 			},
 			KeyVals: []interface{}{
 				"test",
@@ -238,8 +236,8 @@ func Test_ActivationKeyLogger_shouldActivate(t *testing.T) {
 		// when not matching lower log levels. The activation key info does not
 		// match the log level error because error is higher than info.
 		{
-			ActivationKeys: []string{
-				"info",
+			Activations: map[string]string{
+				"info": "*",
 			},
 			KeyVals: []interface{}{
 				"test",
@@ -249,10 +247,44 @@ func Test_ActivationKeyLogger_shouldActivate(t *testing.T) {
 			},
 			ExpectedResult: false,
 		},
+
+		// Case 17, ... .
+		{
+			Activations: map[string]string{
+				"level":     "info",
+				"verbosity": "3",
+			},
+			KeyVals: []interface{}{
+				"level",
+				"info",
+				"verbosity",
+				"3",
+				"message",
+				"test",
+			},
+			ExpectedResult: true,
+		},
+
+		// Case 18, ... .
+		{
+			Activations: map[string]string{
+				"level":     "info",
+				"verbosity": "3",
+			},
+			KeyVals: []interface{}{
+				"level",
+				"info",
+				"verbosity",
+				"3",
+				"message",
+				"test",
+			},
+			ExpectedResult: true,
+		},
 	}
 
 	for i, tc := range testCases {
-		result, err := shouldActivate(tc.ActivationKeys, tc.KeyVals)
+		result, err := shouldActivate(tc.Activations, tc.KeyVals)
 		if err != nil {
 			t.Fatalf("case %d expected %#v got %#v", i, nil, err)
 		}
