@@ -7,22 +7,23 @@ import (
 )
 
 const (
-	WildCardActivation = "*"
+	KeyLevel     = "level"
+	KeyVerbosity = "verbosity"
 )
 
 const (
 	levelDebug levelID = 1 << iota
 	levelInfo
-	levelWarn
+	levelWarning
 	levelError
 )
 
 var (
 	levelMapping = map[string]levelID{
-		"debug": levelDebug,
-		"info":  levelInfo,
-		"warn":  levelWarn,
-		"error": levelError,
+		"debug":   levelDebug,
+		"info":    levelInfo,
+		"warning": levelWarning,
+		"error":   levelError,
 	}
 )
 
@@ -31,13 +32,13 @@ type levelID byte
 type ActivationLoggerConfig struct {
 	Underlying Logger
 
-	Activations map[string]string
+	Activations map[string]interface{}
 }
 
 type activationLogger struct {
 	underlying Logger
 
-	activations map[string]string
+	activations map[string]interface{}
 }
 
 func NewActivation(config ActivationLoggerConfig) (Logger, error) {
@@ -84,14 +85,10 @@ func (l *activationLogger) With(keyVals ...interface{}) Logger {
 	return l.underlying.With(keyVals...)
 }
 
-func containsKey(keyVals []interface{}, activation string) bool {
-	if activation == WildCardActivation {
-		return true
-	}
-
+func containsKey(keyVals []interface{}, aKey string) bool {
 	for i := 0; i < len(keyVals); i += 2 {
 		s, ok := keyVals[i].(string)
-		if ok && s == activation {
+		if ok && s == aKey {
 			return true
 		}
 	}
@@ -99,14 +96,9 @@ func containsKey(keyVals []interface{}, activation string) bool {
 	return false
 }
 
-func containsVal(keyVals []interface{}, activation string) bool {
-	if activation == WildCardActivation {
-		return true
-	}
-
+func containsVal(keyVals []interface{}, aVal interface{}) bool {
 	for i := 1; i < len(keyVals); i += 2 {
-		s, ok := keyVals[i].(string)
-		if ok && s == activation {
+		if keyVals[i] == aVal {
 			return true
 		}
 	}
@@ -114,18 +106,29 @@ func containsVal(keyVals []interface{}, activation string) bool {
 	return false
 }
 
-func isLevelAllowed(keyVals []interface{}, activation string) bool {
-	activationLevel, ok := levelMapping[activation]
+func isLevelAllowed(keyVals []interface{}, aVal interface{}) bool {
+	s, ok := aVal.(string)
+	if !ok {
+		return false
+	}
+	activationLevel, ok := levelMapping[s]
 	if !ok {
 		return false
 	}
 
 	for i := 0; i < len(keyVals); i += 2 {
-		s, ok := keyVals[i].(string)
+		k, ok := keyVals[i].(string)
 		if !ok {
 			continue
 		}
-		keyValsLevel, ok := levelMapping[s]
+		if k != KeyLevel {
+			continue
+		}
+		v, ok := keyVals[i+1].(string)
+		if !ok {
+			continue
+		}
+		keyValsLevel, ok := levelMapping[v]
 		if !ok {
 			continue
 		}
@@ -136,7 +139,32 @@ func isLevelAllowed(keyVals []interface{}, activation string) bool {
 	return false
 }
 
-func shouldActivate(activations map[string]string, keyVals []interface{}) (bool, error) {
+func isVerbosityAllowed(keyVals []interface{}, aVal interface{}) bool {
+	activationVerbosity, ok := aVal.(int)
+	if !ok {
+		return false
+	}
+
+	for i := 0; i < len(keyVals); i += 2 {
+		k, ok := keyVals[i].(string)
+		if !ok {
+			continue
+		}
+		if k != KeyVerbosity {
+			continue
+		}
+		keyValsVerbosity, ok := keyVals[i+1].(int)
+		if !ok {
+			continue
+		}
+
+		return activationVerbosity >= keyValsVerbosity
+	}
+
+	return false
+}
+
+func shouldActivate(activations map[string]interface{}, keyVals []interface{}) (bool, error) {
 	var activationCount int
 
 	for aKey, aVal := range activations {
@@ -144,8 +172,11 @@ func shouldActivate(activations map[string]string, keyVals []interface{}) (bool,
 			activationCount++
 			continue
 		}
-
-		if isLevelAllowed(keyVals, aKey) || isLevelAllowed(keyVals, aVal) {
+		if aKey == KeyLevel && isLevelAllowed(keyVals, aVal) {
+			activationCount++
+			continue
+		}
+		if aKey == KeyVerbosity && isVerbosityAllowed(keyVals, aVal) {
 			activationCount++
 			continue
 		}
