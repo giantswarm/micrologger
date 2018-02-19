@@ -58,8 +58,8 @@ func Test_ActivationKeyLogger_shouldActivate_arbitrary(t *testing.T) {
 		KeyVals        []interface{}
 		ExpectedResult bool
 	}{
-		// Case 0, a given activation key not matching any keyVals results into
-		// false.
+		// Case 0, a given activation does not match any keyVals and results into
+		// false when the list of KeyVals is empty.
 		{
 			Activations: map[string]interface{}{
 				"foo": "bar",
@@ -68,8 +68,7 @@ func Test_ActivationKeyLogger_shouldActivate_arbitrary(t *testing.T) {
 			ExpectedResult: false,
 		},
 
-		// Case 1, a given activation key not matching any keyVals results into
-		// false.
+		// Case 1, same as 0 but with different activation keys.
 		{
 			Activations: map[string]interface{}{
 				"foo": 3,
@@ -78,8 +77,7 @@ func Test_ActivationKeyLogger_shouldActivate_arbitrary(t *testing.T) {
 			ExpectedResult: false,
 		},
 
-		// Case 2, same as 2 but with different activation keys.
-		// false.
+		// Case 2, same as 0 but with different activation keys.
 		{
 			Activations: map[string]interface{}{
 				"foo": "bar",
@@ -90,7 +88,8 @@ func Test_ActivationKeyLogger_shouldActivate_arbitrary(t *testing.T) {
 			ExpectedResult: false,
 		},
 
-		// Case 3, same as 2 but with given keyVals which still do not match.
+		// Case 3, a given activation does not match any keyVals and results into
+		// false when the list of KeyVals is not empty.
 		{
 			Activations: map[string]interface{}{
 				"foo": "bar",
@@ -104,7 +103,7 @@ func Test_ActivationKeyLogger_shouldActivate_arbitrary(t *testing.T) {
 			ExpectedResult: false,
 		},
 
-		// Case 4, same as 4 but with different activation keys.
+		// Case 4, same as 3 but with different activation keys.
 		{
 			Activations: map[string]interface{}{
 				"foo": "bar",
@@ -134,7 +133,7 @@ func Test_ActivationKeyLogger_shouldActivate_arbitrary(t *testing.T) {
 			ExpectedResult: true,
 		},
 
-		// Case 6, same as 6 but with different matching activation keys.
+		// Case 6, same as 5 but with different activation keys.
 		{
 			Activations: map[string]interface{}{
 				"test": 3,
@@ -149,36 +148,7 @@ func Test_ActivationKeyLogger_shouldActivate_arbitrary(t *testing.T) {
 			ExpectedResult: true,
 		},
 
-		// Case 7, activation keys matching values of the keyVals result in false,
-		// because we only want to activate on matching keys.
-		{
-			Activations: map[string]interface{}{
-				"val": "key",
-			},
-			KeyVals: []interface{}{
-				"key",
-				"val",
-			},
-			ExpectedResult: false,
-		},
-
-		// Case 8, activation keys matching keys of the keyVals still result in true
-		// even if values match as well.
-		{
-			Activations: map[string]interface{}{
-				"key": "val",
-				"val": "key",
-			},
-			KeyVals: []interface{}{
-				"key",
-				"val",
-				"val",
-				"key",
-			},
-			ExpectedResult: true,
-		},
-
-		// Case 9, activation keys must all match in order to result in true.
+		// Case 7, activation keys must all match in order to result in true.
 		{
 			Activations: map[string]interface{}{
 				"foo": "val",
@@ -248,7 +218,7 @@ func Test_ActivationKeyLogger_shouldActivate_level(t *testing.T) {
 			ExpectedResult: true,
 		},
 
-		// Case 1, same as 12 but with a different log level.
+		// Case 1, same as 0 but with a different log level.
 		{
 			Activations: map[string]interface{}{
 				"level": "error",
@@ -263,8 +233,8 @@ func Test_ActivationKeyLogger_shouldActivate_level(t *testing.T) {
 		},
 
 		// Case 2, activation keys representing common log levels result in true
-		// when matching lower log levels. The activation key info matches the log
-		// level debug because debug is lower than info.
+		// when matching lower log levels. The activation key level/info matches the
+		// log level debug because debug is lower than info.
 		{
 			Activations: map[string]interface{}{
 				"level": "info",
@@ -279,8 +249,8 @@ func Test_ActivationKeyLogger_shouldActivate_level(t *testing.T) {
 		},
 
 		// Case 3, activation keys representing common log levels result in false
-		// when not matching lower log levels. The activation key info does not
-		// match the log level warning because warning is higher than info.
+		// when not matching lower log levels. The activation key level/info does
+		// not match the log level warning because warning is higher than info.
 		{
 			Activations: map[string]interface{}{
 				"level": "info",
@@ -295,8 +265,8 @@ func Test_ActivationKeyLogger_shouldActivate_level(t *testing.T) {
 		},
 
 		// Case 4, activation keys representing common log levels result in false
-		// when not matching lower log levels. The activation key info does not
-		// match the log level error because error is higher than info.
+		// when not matching lower log levels. The activation key level/info does
+		// not match the log level error because error is higher than info.
 		{
 			Activations: map[string]interface{}{
 				"level": "info",
@@ -310,7 +280,7 @@ func Test_ActivationKeyLogger_shouldActivate_level(t *testing.T) {
 			ExpectedResult: false,
 		},
 
-		// Case 5, ... .
+		// Case 5, log level and verbosity matches together result in true.
 		{
 			Activations: map[string]interface{}{
 				"level":     "info",
@@ -327,33 +297,17 @@ func Test_ActivationKeyLogger_shouldActivate_level(t *testing.T) {
 			ExpectedResult: true,
 		},
 
-		// Case 6, ... .
+		// Case 6, same as 5 but with different log level and verbosity.
 		{
 			Activations: map[string]interface{}{
-				"level":     "info",
-				"verbosity": 3,
+				"level":     "error",
+				"verbosity": 5,
 			},
 			KeyVals: []interface{}{
 				"level",
-				"info",
+				"error",
 				"verbosity",
-				3,
-				"message",
-				"test",
-			},
-			ExpectedResult: true,
-		},
-
-		// Case 7, ... independent of verbosity .
-		{
-			Activations: map[string]interface{}{
-				"level": "info",
-			},
-			KeyVals: []interface{}{
-				"level",
-				"info",
-				"verbosity",
-				15,
+				5,
 				"message",
 				"test",
 			},
@@ -379,7 +333,7 @@ func Test_ActivationKeyLogger_shouldActivate_verbosity(t *testing.T) {
 		KeyVals        []interface{}
 		ExpectedResult bool
 	}{
-		// Case 0, ... .
+		// Case 0, exact verbosity matching results in true.
 		{
 			Activations: map[string]interface{}{
 				"verbosity": 3,
@@ -395,7 +349,7 @@ func Test_ActivationKeyLogger_shouldActivate_verbosity(t *testing.T) {
 			ExpectedResult: true,
 		},
 
-		// Case 1, ... .
+		// Case 1, same as 0 but with different verbosity.
 		{
 			Activations: map[string]interface{}{
 				"verbosity": 6,
@@ -411,7 +365,8 @@ func Test_ActivationKeyLogger_shouldActivate_verbosity(t *testing.T) {
 			ExpectedResult: true,
 		},
 
-		// Case 2, ... .
+		// Case 2, activation verbosity matching lower verbosity in keyVals results
+		// in true.
 		{
 			Activations: map[string]interface{}{
 				"verbosity": 6,
@@ -427,7 +382,8 @@ func Test_ActivationKeyLogger_shouldActivate_verbosity(t *testing.T) {
 			ExpectedResult: true,
 		},
 
-		// Case 3, ... .
+		// Case 3, activation verbosity compared to higher verbosity in keyVals does
+		// not match and results in false.
 		{
 			Activations: map[string]interface{}{
 				"verbosity": 6,
