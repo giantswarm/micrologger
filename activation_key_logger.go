@@ -41,6 +41,33 @@ type activationLogger struct {
 	activations map[string]interface{}
 }
 
+// NewActivation creates a new activation key logger. This logger kind can be
+// used on command line tools to improve situations in which log filtering using
+// other command line tools like grep is not sufficient. Due to certain filter
+// mechanisms this Logger implementation should not be used in performance
+// critical applications. The idea of the activation key logger is to have a
+// multi dimensional log filter mechanism. This logger here provides three
+// different features which can be combined and used simultaneously at will.
+//
+//     Filtering arbitrary key-value pairs. The structured nature of the Logger
+//     interface expects key-value pairs to be logged. The activation key logger
+//     can be configured with any kind of activation key-pairs which, when
+//     configured, all have to match against an emitted logging call, in order
+//     to be dispatched. In case none, or not all activation keys match, the
+//     emitted logging call is going to be ignored.
+//
+//     Filtering log levels works using the special log levels debug, info,
+//     warning and error. The level based nature of this activation mechanism is
+//     that lower log levels match just like exact log levels match. When the
+//     Logger is configured to activate on info log levels, the Logger will
+//     activate on debug related logs, as well as info related logs, but not on
+//     warning or error related logs.
+//
+//     Filtering log verbosity works similar like the log level mechanism, but
+//     on arbitrary verbosity levels, which are represented as numbers. As long
+//     as the configured verbosity is higher or equal to the perceived verbosity
+//     obtained by the emitted logging call, the log will be dispatched.
+//
 func NewActivation(config ActivationLoggerConfig) (Logger, error) {
 	if config.Underlying == nil {
 		return nil, microerror.Maskf(invalidConfigError, "%T.Underlying must not be empty", config)
