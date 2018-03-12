@@ -16,11 +16,11 @@ type Config struct {
 	TimestampFormatter kitlog.Valuer
 }
 
-type KitLogger struct {
+type MicroLogger struct {
 	logger kitlog.Logger
 }
 
-func New(config Config) (*KitLogger, error) {
+func New(config Config) (*MicroLogger, error) {
 	if config.Caller == nil {
 		config.Caller = DefaultCaller
 	}
@@ -38,18 +38,18 @@ func New(config Config) (*KitLogger, error) {
 		"time", config.TimestampFormatter,
 	)
 
-	l := &KitLogger{
+	l := &MicroLogger{
 		logger: kitLogger,
 	}
 
 	return l, nil
 }
 
-func (l *KitLogger) Log(keyVals ...interface{}) error {
+func (l *MicroLogger) Log(keyVals ...interface{}) error {
 	return l.logger.Log(keyVals...)
 }
 
-func (l *KitLogger) LogCtx(ctx context.Context, keyVals ...interface{}) error {
+func (l *MicroLogger) LogCtx(ctx context.Context, keyVals ...interface{}) error {
 	meta, ok := loggermeta.FromContext(ctx)
 	if !ok {
 		return l.logger.Log(keyVals...)
@@ -68,8 +68,8 @@ func (l *KitLogger) LogCtx(ctx context.Context, keyVals ...interface{}) error {
 	return l.logger.Log(newKeyVals...)
 }
 
-func (l *KitLogger) With(keyVals ...interface{}) Logger {
-	return &KitLogger{
+func (l *MicroLogger) With(keyVals ...interface{}) Logger {
+	return &MicroLogger{
 		logger: kitlog.With(l.logger, keyVals...),
 	}
 }
