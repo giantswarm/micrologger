@@ -1,0 +1,23 @@
+version: 2
+jobs:
+  build:
+    working_directory: /go/src/github.com/giantswarm/micrologger
+  docker:
+    - image: circleci/golang:1.10-stretch
+  steps:
+    - checkout
+    - restore_cache:
+      keys:
+        - v1-pkg-cache
+    - run:
+        name: Install dep
+        command: go get -u github.com/golang/dep/cmd/dep
+    - run:
+        name: Install dependencies
+        command: dep ensure
+    - run:
+        name: Run tests
+        command: go test ./...
+    - run:
+        name: Build
+        command: go build
