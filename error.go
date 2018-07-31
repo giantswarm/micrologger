@@ -1,7 +1,7 @@
 package micrologger
 
 import (
-	"github.com/juju/microerror"
+	"github.com/giantswarm/microerror"
 )
 
 var invalidConfigError = &microerror.Error{
