@@ -1,24 +1,19 @@
 version: 2
 jobs:
   build:
-    docker:
-      # CircleCI Go images available at: https://hub.docker.com/r/circleci/golang/
-      - image: circleci/golang:1.10-stretch
-
-    working_directory: /go/src/github.com/giantswarm/micrologger
-
+    machine: true
     steps:
-      - checkout
+    - checkout
 
-      - restore_cache:
-          keys:
-            - v1-pkg-cache
-
-      - run: go test ./...
-
-      - run: go build
-
-      - save_cache:
-          key: v1-pkg-cache
-          paths:
-            - "/go/pkg"
+    - run: |
+        wget -q $(curl -sS -H "Authorization: token $RELEASE_TOKEN" https://api.github.com/repos/giantswarm/architect/releases/latest | grep browser_download_url | head -n 1 | cut -d '"' -f 4)
+        chmod +x ./architect
+        ./architect version
+    - run: ./architect build
+    - store_test_results:
+        path: /tmp/results
+    - deploy:
+        command: |
+          if [ "${CIRCLE_BRANCH}" == "master" ]; then
+            ./architect deploy
+          fi
