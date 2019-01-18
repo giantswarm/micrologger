@@ -166,7 +166,7 @@ func Test_ActivationKeyLogger_shouldActivate_arbitrary(t *testing.T) {
 			ExpectedResult: true,
 		},
 
-		// Case 10, not all activation keys matching results in false.
+		// Case 8, not all activation keys matching results in false.
 		{
 			Activations: map[string]interface{}{
 				"foo": "val",
@@ -179,6 +179,20 @@ func Test_ActivationKeyLogger_shouldActivate_arbitrary(t *testing.T) {
 				"bar",
 				"val",
 				"notmatching",
+				"val",
+			},
+			ExpectedResult: false,
+		},
+
+		// Case 9, non matching value.
+		{
+			Activations: map[string]interface{}{
+				"foo": "val",
+			},
+			KeyVals: []interface{}{
+				"foo",
+				"non-val",
+				"bar",
 				"val",
 			},
 			ExpectedResult: false,
