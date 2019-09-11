@@ -27,8 +27,12 @@
 
 [[constraint]]
   name = "github.com/go-kit/kit"
-  version = "0.6.0"
+  version = "0.9.0"
 
 [[constraint]]
   name = "github.com/go-stack/stack"
-  version = "1.7.0"
+  version = "1.8.0"
+
+[prune]
+  go-tests = true
+  unused-packages = true
