@@ -14,6 +14,8 @@ type Config struct {
 	Caller             kitlog.Valuer
 	IOWriter           io.Writer
 	TimestampFormatter kitlog.Valuer
+
+	HumanReadable bool
 }
 
 type MicroLogger struct {
@@ -31,7 +33,15 @@ func New(config Config) (*MicroLogger, error) {
 		config.IOWriter = DefaultIOWriter
 	}
 
-	kitLogger := kitlog.NewJSONLogger(kitlog.NewSyncWriter(config.IOWriter))
+	var kitLogger kitlog.Logger
+	{
+		if config.HumanReadable {
+			kitLogger = kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(config.IOWriter))
+		} else {
+			kitLogger = kitlog.NewJSONLogger(kitlog.NewSyncWriter(config.IOWriter))
+		}
+	}
+
 	kitLogger = kitlog.With(
 		kitLogger,
 		"caller", config.Caller,
