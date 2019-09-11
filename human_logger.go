@@ -10,17 +10,19 @@ import (
 	"github.com/giantswarm/micrologger/loggermeta"
 )
 
-type Config struct {
+type HumanConfig struct {
 	Caller             kitlog.Valuer
 	IOWriter           io.Writer
 	TimestampFormatter kitlog.Valuer
+
+	Verbose bool
 }
 
-type MicroLogger struct {
+type HumanLogger struct {
 	logger kitlog.Logger
 }
 
-func New(config Config) (*MicroLogger, error) {
+func NewHumanLogger(config Config) (*HumanLogger, error) {
 	if config.Caller == nil {
 		config.Caller = DefaultCaller
 	}
@@ -31,7 +33,7 @@ func New(config Config) (*MicroLogger, error) {
 		config.IOWriter = DefaultIOWriter
 	}
 
-	kitLogger := kitlog.NewJSONLogger(kitlog.NewSyncWriter(config.IOWriter))
+	kitLogger := kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(config.IOWriter))
 
 	kitLogger = kitlog.With(
 		kitLogger,
@@ -39,18 +41,28 @@ func New(config Config) (*MicroLogger, error) {
 		"time", config.TimestampFormatter,
 	)
 
-	l := &MicroLogger{
+	l := &HumanLogger{
 		logger: kitLogger,
 	}
 
 	return l, nil
 }
 
-func (l *MicroLogger) Log(keyVals ...interface{}) error {
-	return l.logger.Log(keyVals...)
+func (l *HumanLogger) Log(keyVals ...interface{}) error {
+	var output []interface{}
+	for i := 0; i < len(keyVals); i += 2 {
+		k := keyVals[i]
+		v := keyVals[i+1]
+		switch k {
+		case "message":
+			//output = append(output, k)
+			output = append(output, v)
+		}
+	}
+	return l.logger.Log(output)
 }
 
-func (l *MicroLogger) LogCtx(ctx context.Context, keyVals ...interface{}) error {
+func (l *HumanLogger) LogCtx(ctx context.Context, keyVals ...interface{}) error {
 	meta, ok := loggermeta.FromContext(ctx)
 	if !ok {
 		return l.logger.Log(keyVals...)
@@ -69,8 +81,8 @@ func (l *MicroLogger) LogCtx(ctx context.Context, keyVals ...interface{}) error 
 	return l.logger.Log(newKeyVals...)
 }
 
-func (l *MicroLogger) With(keyVals ...interface{}) Logger {
-	return &MicroLogger{
+func (l *HumanLogger) With(keyVals ...interface{}) Logger {
+	return &HumanLogger{
 		logger: kitlog.With(l.logger, keyVals...),
 	}
 }
