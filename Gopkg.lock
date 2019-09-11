@@ -10,9 +10,12 @@
   revision = "cb07ec533b5032add513abb1c4a886d7a19ddc69"
 
 [[projects]]
-  digest = "1:ab3cd0b7271b473b0a90bb9ba3f03958f134bca81390d20071a03ffd7df8ef79"
+  digest = "1:e64813bb254b926fd4ad3e9538d1cc5b5f2260e1b5f9ae2d128599ff2193752f"
   name = "github.com/go-kit/kit"
-  packages = ["log"]
+  packages = [
+    "log",
+    "log/logrus",
+  ]
   pruneopts = "UT"
   revision = "150a65a7ec6156b4b640c1fd55f26fd3d475d656"
   version = "v0.9.0"
@@ -42,6 +45,14 @@
   revision = "08cceb5d0b5331634b9826762a8fd53b29b86ad8"
 
 [[projects]]
+  digest = "1:31e761d97c76151dde79e9d28964a812c46efc5baee4085b86f68f0c654450de"
+  name = "github.com/konsorten/go-windows-terminal-sequences"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e"
+  version = "v1.0.2"
+
+[[projects]]
   branch = "master"
   digest = "1:a64e323dc06b73892e5bb5d040ced475c4645d456038333883f58934abbf6f72"
   name = "github.com/kr/logfmt"
@@ -49,12 +60,29 @@
   pruneopts = "UT"
   revision = "b84e30acd515aadc4b783ad4ff83aff3299bdfe0"
 
+[[projects]]
+  digest = "1:04457f9f6f3ffc5fea48e71d62f2ca256637dee0a04d710288e27e05c8b41976"
+  name = "github.com/sirupsen/logrus"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "839c75faf7f98a33d445d181f3018b5c3409a45e"
+  version = "v1.4.2"
+
+[[projects]]
+  branch = "master"
+  digest = "1:9a9d873379b3a947a4a1606caea86ce9c4aec8e5b0fae406c5785b052664eb16"
+  name = "golang.org/x/sys"
+  packages = ["unix"]
+  pruneopts = "UT"
+  revision = "bbd175535a8b9969bb0b33f1502f681ee0b122bd"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
     "github.com/giantswarm/microerror",
     "github.com/go-kit/kit/log",
+    "github.com/go-kit/kit/log/logrus",
     "github.com/go-stack/stack",
   ]
   solver-name = "gps-cdcl"

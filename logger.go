@@ -6,6 +6,8 @@ import (
 	"io"
 
 	kitlog "github.com/go-kit/kit/log"
+	kitlogrus "github.com/go-kit/kit/log/logrus"
+	"github.com/sirupsen/logrus"
 
 	"github.com/giantswarm/micrologger/loggermeta"
 )
@@ -36,7 +38,7 @@ func New(config Config) (*MicroLogger, error) {
 	var kitLogger kitlog.Logger
 	{
 		if config.HumanReadable {
-			kitLogger = kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(config.IOWriter))
+			kitLogger = kitlogrus.NewLogrusLogger(logrus.New())
 		} else {
 			kitLogger = kitlog.NewJSONLogger(kitlog.NewSyncWriter(config.IOWriter))
 		}
