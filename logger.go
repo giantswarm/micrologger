@@ -3,21 +3,30 @@ package micrologger
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"io"
+	"log"
+	"strings"
 
-	kitlog "github.com/go-kit/kit/log"
+	"github.com/fatih/color"
 
 	"github.com/giantswarm/micrologger/loggermeta"
 )
 
+type Valuer func() interface{}
+
 type Config struct {
-	Caller             kitlog.Valuer
+	Caller             Valuer
 	IOWriter           io.Writer
-	TimestampFormatter kitlog.Valuer
+	TimestampFormatter Valuer
+	Human              bool
 }
 
 type MicroLogger struct {
-	logger kitlog.Logger
+	human   bool
+	log     *log.Logger // store as pointer as logger contains a mutex
+	keyVals map[interface{}]interface{}
 }
 
 func New(config Config) (*MicroLogger, error) {
@@ -31,46 +40,91 @@ func New(config Config) (*MicroLogger, error) {
 		config.IOWriter = DefaultIOWriter
 	}
 
-	kitLogger := kitlog.NewJSONLogger(kitlog.NewSyncWriter(config.IOWriter))
+	log := log.New(config.IOWriter, "", 0)
 
-	kitLogger = kitlog.With(
-		kitLogger,
-		"caller", config.Caller,
-		"time", config.TimestampFormatter,
-	)
-
-	l := &MicroLogger{
-		logger: kitLogger,
+	logger := &MicroLogger{
+		human: config.Human,
+		keyVals: map[interface{}]interface{}{
+			"caller": config.Caller,
+			"time":   config.TimestampFormatter,
+			"level":  "info",
+		},
+		log: log,
 	}
 
-	return l, nil
+	return logger, nil
+}
+
+func ToString(v interface{}) string {
+	valuer, ok := v.(Valuer)
+	if ok {
+		v = valuer()
+	}
+	return fmt.Sprintf("%v", v)
 }
 
 func (l *MicroLogger) Log(keyVals ...interface{}) error {
-	return l.logger.Log(keyVals...)
+	combined := map[string]string{}
+	for k, v := range l.keyVals {
+		k := ToString(k)
+		v := ToString(v)
+		combined[k] = v
+	}
+	for i := 0; i < len(keyVals); i += 2 {
+		k := ToString(keyVals[i])
+		v := ToString(keyVals[i+1])
+		combined[k] = v
+	}
+	var encoded string
+	if l.human {
+		level := strings.ToUpper(combined["level"])
+		switch level {
+		case "ERROR":
+			level = color.RedString(level)
+			break
+		case "WARN":
+			level = color.YellowString(level)
+			break
+		}
+		encoded = fmt.Sprintf("%s %s %s", color.GreenString(combined["time"]), level, combined["message"])
+	} else {
+		marshalled, err := json.Marshal(combined)
+		if err != nil {
+			return err
+		}
+		encoded = string(marshalled)
+	}
+	l.log.Println(encoded)
+	return nil
 }
 
 func (l *MicroLogger) LogCtx(ctx context.Context, keyVals ...interface{}) error {
 	meta, ok := loggermeta.FromContext(ctx)
 	if !ok {
-		return l.logger.Log(keyVals...)
+		return l.Log(keyVals...)
 	}
 
-	var newKeyVals []interface{}
-	{
-		newKeyVals = append(newKeyVals, keyVals...)
-
-		for k, v := range meta.KeyVals {
-			newKeyVals = append(newKeyVals, k)
-			newKeyVals = append(newKeyVals, v)
-		}
+	combined := keyVals
+	for k, v := range meta.KeyVals {
+		combined = append(combined, k)
+		combined = append(combined, v)
 	}
 
-	return l.logger.Log(newKeyVals...)
+	return l.Log(combined...)
 }
 
 func (l *MicroLogger) With(keyVals ...interface{}) Logger {
+	combined := map[interface{}]interface{}{}
+	for k, v := range l.keyVals {
+		combined[k] = v
+	}
+	for i := 0; i < len(keyVals); i += 2 {
+		k := keyVals[i]
+		v := keyVals[i+1]
+		combined[k] = v
+	}
 	return &MicroLogger{
-		logger: kitlog.With(l.logger, keyVals...),
+		keyVals: combined,
+		log:     l.log,
 	}
 }

@@ -9,7 +9,7 @@ import (
 )
 
 var DefaultCaller = func() interface{} {
-	return fmt.Sprintf("%+v", stack.Caller(4))
+	return fmt.Sprintf("%+v", stack.Caller(3))
 }
 
 var DefaultIOWriter = os.Stdout

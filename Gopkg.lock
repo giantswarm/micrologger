@@ -2,28 +2,20 @@
 
 
 [[projects]]
+  digest = "1:865079840386857c809b72ce300be7580cb50d3d3129ce11bf9aa6ca2bc1934a"
+  name = "github.com/fatih/color"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "5b77d2a35fb0ede96d138fc9a99f5c9b6aef11b4"
+  version = "v1.7.0"
+
+[[projects]]
   branch = "master"
   digest = "1:e8738596bf054a708e81e8637ba8d7ffd22cab0f8303583ced0a147332b06ef1"
   name = "github.com/giantswarm/microerror"
   packages = ["."]
   pruneopts = "UT"
   revision = "cb07ec533b5032add513abb1c4a886d7a19ddc69"
-
-[[projects]]
-  digest = "1:ab3cd0b7271b473b0a90bb9ba3f03958f134bca81390d20071a03ffd7df8ef79"
-  name = "github.com/go-kit/kit"
-  packages = ["log"]
-  pruneopts = "UT"
-  revision = "150a65a7ec6156b4b640c1fd55f26fd3d475d656"
-  version = "v0.9.0"
-
-[[projects]]
-  digest = "1:4062bc6de62d73e2be342243cf138cf499b34d558876db8d9430e2149388a4d8"
-  name = "github.com/go-logfmt/logfmt"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "07c9b44f60d7ffdfb7d8efe1ad539965737836dc"
-  version = "v0.4.0"
 
 [[projects]]
   digest = "1:586ea76dbd0374d6fb649a91d70d652b7fe0ccffb8910a77468e7702e7901f3d"
@@ -42,19 +34,35 @@
   revision = "08cceb5d0b5331634b9826762a8fd53b29b86ad8"
 
 [[projects]]
-  branch = "master"
-  digest = "1:a64e323dc06b73892e5bb5d040ced475c4645d456038333883f58934abbf6f72"
-  name = "github.com/kr/logfmt"
+  digest = "1:c658e84ad3916da105a761660dcaeb01e63416c8ec7bc62256a9b411a05fcd67"
+  name = "github.com/mattn/go-colorable"
   packages = ["."]
   pruneopts = "UT"
-  revision = "b84e30acd515aadc4b783ad4ff83aff3299bdfe0"
+  revision = "167de6bfdfba052fa6b2d3664c8f5272e23c9072"
+  version = "v0.0.9"
+
+[[projects]]
+  digest = "1:36325ebb862e0382f2f14feef409ba9351271b89ada286ae56836c603d43b59c"
+  name = "github.com/mattn/go-isatty"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "e1f7b56ace729e4a73a29a6b4fac6cd5fcda7ab3"
+  version = "v0.0.9"
+
+[[projects]]
+  branch = "master"
+  digest = "1:31ca8823684b4b0c204df1d4a9f3c511f41cc3e7ab6decc2ca5ffacc358d2818"
+  name = "golang.org/x/sys"
+  packages = ["unix"]
+  pruneopts = "UT"
+  revision = "c3b328c6e5a763a2bfc82a48b4bd855037210934"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/fatih/color",
     "github.com/giantswarm/microerror",
-    "github.com/go-kit/kit/log",
     "github.com/go-stack/stack",
   ]
   solver-name = "gps-cdcl"
