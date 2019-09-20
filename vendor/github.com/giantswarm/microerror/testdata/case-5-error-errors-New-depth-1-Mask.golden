@@ -1,0 +1,10 @@
+{
+	"kind": "unknown",
+	"annotation": "test error",
+	"stack": [
+		{
+			"file": "--REPLACED--/github.com/giantswarm/microerror/json_test.go",
+			"line": 72
+		}
+	]
+}
