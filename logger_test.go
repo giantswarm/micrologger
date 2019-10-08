@@ -4,163 +4,142 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"flag"
+	"io/ioutil"
+	"path/filepath"
+	"strconv"
 	"testing"
+	"unicode"
+
+	"github.com/google/go-cmp/cmp"
 
 	"github.com/giantswarm/micrologger/loggermeta"
 )
 
-func Test_Logger_LogWithCtx(t *testing.T) {
-	var err error
+var update = flag.Bool("update", false, "update .golden files")
 
-	out := new(bytes.Buffer)
-
-	var log Logger
-	{
-		c := Config{
-			IOWriter: out,
-		}
-		log, err = New(c)
-		if err != nil {
-			t.Fatalf("setting up logger: %#v", err)
-		}
+// Test_MicroLogger tests MicroLogger output.
+//
+// It uses golden file as reference and when changes to template are
+// intentional, they can be updated by providing -update flag for go test.
+//
+//	go test . -run Test_MicroLogger -update
+//
+func Test_MicroLogger(t *testing.T) {
+	testCases := []struct {
+		name              string
+		inputCtxKeyValues map[string]string
+		inputLogKeyVals   []interface{}
+		inputWithKeyVals  []interface{}
+	}{
+		{
+			name:              "case 0",
+			inputCtxKeyValues: map[string]string{},
+			inputLogKeyVals: []interface{}{
+				"foo", "bar",
+			},
+			inputWithKeyVals: []interface{}{},
+		},
+		{
+			name: "case 1",
+			inputCtxKeyValues: map[string]string{
+				"baz": "zap",
+			},
+			inputLogKeyVals: []interface{}{
+				"foo", "bar",
+			},
+			inputWithKeyVals: []interface{}{},
+		},
+		{
+			name:              "case 2",
+			inputCtxKeyValues: map[string]string{},
+			inputLogKeyVals: []interface{}{
+				"foo", "bar",
+			},
+			inputWithKeyVals: []interface{}{
+				"baz", "zap",
+			},
+		},
 	}
 
-	{
-		log.LogCtx(context.TODO(), "foo", "bar")
+	for i, tc := range testCases {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			var err error
 
-		var got map[string]string
-		err := json.Unmarshal(out.Bytes(), &got)
-		if err != nil {
-			t.Fatalf("expected %#v got %#v", nil, err)
-		}
+			w := &bytes.Buffer{}
 
-		v1, ok := got["foo"]
-		if !ok {
-			t.Fatalf("expected %s got %s", "foo key", "nothing")
-		}
-		if v1 != "bar" {
-			t.Fatalf("expected %s got %s", "bar", v1)
-		}
-		v2, ok := got["baz"]
-		if ok {
-			t.Fatalf("expected %s got %s", "nothing", "baz key")
-		}
-		if v2 == "zap" {
-			t.Fatalf("expected %s got %s", "nothing", v2)
-		}
-	}
+			var log Logger
+			{
+				c := Config{
+					IOWriter: w,
+					TimestampFormatter: func() interface{} {
+						return "2019-10-08T20:04:13.490819+00:00"
+					},
+				}
 
-	var ctx context.Context
-	{
-		meta := loggermeta.New()
-		meta.KeyVals["baz"] = "zap"
+				log, err = New(c)
+				if err != nil {
+					t.Fatalf("err = %v, want %v", err, nil)
+				}
+			}
 
-		ctx = loggermeta.NewContext(context.Background(), meta)
-	}
+			if len(tc.inputWithKeyVals) > 0 {
+				log = log.With(tc.inputWithKeyVals...)
+			}
+			if len(tc.inputCtxKeyValues) == 0 {
+				log.Log(tc.inputLogKeyVals...)
+			} else {
+				meta := loggermeta.New()
+				meta.KeyVals = tc.inputCtxKeyValues
 
-	{
-		out.Reset()
-		log.LogCtx(ctx, "foo", "bar")
+				ctx := loggermeta.NewContext(context.Background(), meta)
 
-		var got map[string]string
-		err := json.Unmarshal(out.Bytes(), &got)
-		if err != nil {
-			t.Fatalf("expected %#v got %#v", nil, err)
-		}
+				log.LogCtx(ctx, tc.inputLogKeyVals...)
+			}
 
-		v1, ok := got["foo"]
-		if !ok {
-			t.Fatalf("expected %s got %s", "foo key", "nothing")
-		}
-		if v1 != "bar" {
-			t.Fatalf("expected %s got %s", "bar", v1)
-		}
-		v2, ok := got["baz"]
-		if !ok {
-			t.Fatalf("expected %s got %s", "baz key", "nothing")
-		}
-		if v2 != "zap" {
-			t.Fatalf("expected %s got %s", "zap", v2)
-		}
+			var actual []byte
+			{
+				// Don't flush on purpose. Logs should be
+				// flushed right after they are logged.
+				wCopy := []byte(w.String())
+				w.Reset()
+				err := json.Indent(w, wCopy, "", "\t")
+				if err != nil {
+					t.Fatalf("err = %v, want %v", err, nil)
+				}
+				actual = w.Bytes()
+			}
+
+			golden := filepath.Join("testdata", normalizeToFileName(tc.name)+".golden")
+			if *update {
+				ioutil.WriteFile(golden, actual, 0644)
+			}
+
+			expected, err := ioutil.ReadFile(golden)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if !bytes.Equal(actual, expected) {
+				t.Fatalf("\n\n%s\n", cmp.Diff(actual, expected))
+			}
+		})
 	}
 }
 
-func Test_Logger_With(t *testing.T) {
-	var err error
-
-	out := new(bytes.Buffer)
-
-	var log Logger
-	{
-		c := Config{
-			IOWriter: out,
-		}
-		log, err = New(c)
-		if err != nil {
-			t.Fatalf("setting up logger: %#v", err)
-		}
-	}
-
-	var (
-		field       = "ctxField"
-		wfieldValue = "test ctx field value"
-
-		parentLog = log
-		childLog  = log.With(field, wfieldValue)
-	)
-
-	// Make sure caller (old field) and added contextual field are logged.
-	{
-		wfieldValue := "test ctx field value"
-
-		out.Reset()
-		childLog.Log("msg", "whats up bro?")
-
-		var got map[string]string
-		json.Unmarshal(out.Bytes(), &got)
-
-		// NOTE this tests a line number which may change if lines are modified in
-		// this file.
-		wcaller := "github.com/giantswarm/micrologger/logger_test.go:117"
-		caller, ok := got["caller"]
-		if !ok {
-			t.Errorf("expected caller key")
-		}
-		if caller != wcaller {
-			t.Errorf("want caller %s, got %s", wcaller, caller)
-		}
-
-		fieldValue, ok := got[field]
-		if !ok {
-			t.Errorf("want set field %s", field)
-		}
-		if fieldValue != wfieldValue {
-			t.Errorf("want fieldValue %s, got %s", wfieldValue, fieldValue)
+// normalizeToFileName converts all non-digit, non-letter runes in input string
+// to dash ('-'). Coalesces multiple dashes into one.
+func normalizeToFileName(s string) string {
+	var result []rune
+	for _, r := range []rune(s) {
+		if unicode.IsDigit(r) || unicode.IsLetter(r) {
+			result = append(result, r)
+		} else {
+			l := len(result)
+			if l > 0 && result[l-1] != '-' {
+				result = append(result, rune('-'))
+			}
 		}
 	}
-
-	// Make sure parent logger remained unchanged.
-	{
-		out.Reset()
-		parentLog.Log("msg", "how are you?")
-
-		var got map[string]string
-		json.Unmarshal(out.Bytes(), &got)
-
-		// NOTE this tests a line number which may change if lines are modified in
-		// this file.
-		wcaller := "github.com/giantswarm/micrologger/logger_test.go:145"
-		caller, ok := got["caller"]
-		if !ok {
-			t.Errorf("expected caller key")
-		}
-		if caller != wcaller {
-			t.Errorf("want caller %s, got %s", wcaller, caller)
-		}
-
-		fieldValue, ok := got[field]
-		if ok {
-			t.Errorf("want unset field %s, got %s", field, fieldValue)
-		}
-	}
+	return string(result)
 }
