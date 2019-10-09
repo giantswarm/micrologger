@@ -61,7 +61,17 @@ func Test_MicroLogger(t *testing.T) {
 			},
 		},
 		{
-			name:              "case 3: special case for logging JSON error under stack key",
+			name: "case 3: uneven number of keys",
+			inputLogKeyVals: []interface{}{
+				"foo", "bar",
+				"baz",
+			},
+			inputWithKeyVals: []interface{}{
+				"zap",
+			},
+		},
+		{
+			name:              "case 4: special case for logging JSON error under stack key",
 			inputCtxKeyValues: map[string]string{},
 			inputLogKeyVals: []interface{}{
 				"foo", "bar",
