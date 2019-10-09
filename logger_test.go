@@ -33,7 +33,7 @@ func Test_MicroLogger(t *testing.T) {
 		inputWithKeyVals  []interface{}
 	}{
 		{
-			name:              "case 0",
+			name:              "case 0: simple call with a key and a value",
 			inputCtxKeyValues: map[string]string{},
 			inputLogKeyVals: []interface{}{
 				"foo", "bar",
@@ -41,7 +41,7 @@ func Test_MicroLogger(t *testing.T) {
 			inputWithKeyVals: []interface{}{},
 		},
 		{
-			name: "case 1",
+			name: "case 1: call with contextual value",
 			inputCtxKeyValues: map[string]string{
 				"baz": "zap",
 			},
@@ -51,12 +51,21 @@ func Test_MicroLogger(t *testing.T) {
 			inputWithKeyVals: []interface{}{},
 		},
 		{
-			name:              "case 2",
+			name:              "case 2: call child logger created with .With",
 			inputCtxKeyValues: map[string]string{},
 			inputLogKeyVals: []interface{}{
 				"foo", "bar",
 			},
 			inputWithKeyVals: []interface{}{
+				"baz", "zap",
+			},
+		},
+		{
+			name:              "case 3: special case for logging JSON error under stack key",
+			inputCtxKeyValues: map[string]string{},
+			inputLogKeyVals: []interface{}{
+				"foo", "bar",
+				"stack", `{"kind":"unknown","annotation":"POST https://api.github.com/repos/giantswarm/i-do-not-exist/deployments: 404 Not Found []","stack":[{"file":"/Users/kopiczko/go/src/github.com/giantswarm/opsctl/service/github/github.go","line":143},{"file":"/Users/kopiczko/go/src/github.com/giantswarm/opsctl/service/github/github.go","line":114},{"file":"/Users/kopiczko/go/src/github.com/giantswarm/opsctl/pkg/cmd/deploy/githubdeploy/deployer.go","line":41},{"file":"/Users/kopiczko/go/src/github.com/giantswarm/opsctl/command/deploy/command.go","line":226},{"file":"/Users/kopiczko/go/pkg/mod/github.com/giantswarm/backoff@v0.0.0-20190913091243-4dd491125192/retry.go","line":23},{"file":"/Users/kopiczko/go/src/github.com/giantswarm/opsctl/command/deploy/command.go","line":253}]}`,
 				"baz", "zap",
 			},
 		},
