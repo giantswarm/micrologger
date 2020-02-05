@@ -4,7 +4,7 @@ import (
 	"github.com/giantswarm/microerror"
 )
 
-var invalidConfigError =&
+var invalidConfigError = &microerror.Error{
 	Kind: "invalidConfigError",
 }
 
