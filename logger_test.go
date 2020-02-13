@@ -7,6 +7,7 @@ import (
 	"flag"
 	"io/ioutil"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"testing"
 	"unicode"
@@ -127,6 +128,22 @@ func Test_MicroLogger(t *testing.T) {
 					t.Fatalf("err = %v, want %v", err, nil)
 				}
 				actual = w.Bytes()
+			}
+			// Change paths to avoid prefixes like
+			// "/Users/username/go/src/" so this can test can be
+			// executed on different machines.
+			//
+			// E.g: This:
+			//
+			//	"caller":"/Users/username/go/src/github.com/giantswarm/microerror/json_test.go"
+			//
+			// Should be replaced with:
+			//
+			//	"caller":"--REPLACED--/github.com/giantswarm/microerror/json_test.go"
+			//
+			{
+				r := regexp.MustCompile(`("caller"\s*:\s*")\S+(/[^/"]+.go:\d+")`)
+				actual = r.ReplaceAll(actual, []byte("$1--REPLACED--$2"))
 			}
 
 			golden := filepath.Join("testdata", normalizeToFileName(tc.name)+".golden")

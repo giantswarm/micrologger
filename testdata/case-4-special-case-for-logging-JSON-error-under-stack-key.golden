@@ -1,6 +1,6 @@
 {
 	"baz": "zap",
-	"caller": "github.com/giantswarm/micrologger/logger_test.go:109",
+	"caller": "--REPLACED--/logger_test.go:110",
 	"foo": "bar",
 	"stack": {
 		"annotation": "POST https://api.github.com/repos/giantswarm/i-do-not-exist/deployments: 404 Not Found []",
