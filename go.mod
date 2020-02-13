@@ -3,7 +3,7 @@ module github.com/giantswarm/micrologger
 go 1.13
 
 require (
-	github.com/giantswarm/microerror v0.1.1-0.20200205143715-01b76f66cae6
+	github.com/giantswarm/microerror v0.2.0
 	github.com/go-kit/kit v0.6.0
 	github.com/go-logfmt/logfmt v0.3.0 // indirect
 	github.com/go-stack/stack v1.7.0
