@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"log"
 
 	kitlog "github.com/go-kit/kit/log"
 
@@ -48,7 +49,10 @@ func New(config Config) (*MicroLogger, error) {
 
 func (l *MicroLogger) Log(keyVals ...interface{}) {
 	keyVals = l.processStack(keyVals)
-	l.logger.Log(keyVals...)
+	err := l.logger.Log(keyVals...)
+	if err != nil {
+		log.Printf("failed to log, reason: %#q", err.Error())
+	}
 }
 
 func (l *MicroLogger) LogCtx(ctx context.Context, keyVals ...interface{}) {
@@ -57,7 +61,7 @@ func (l *MicroLogger) LogCtx(ctx context.Context, keyVals ...interface{}) {
 	if !ok {
 		err := l.logger.Log(keyVals...)
 		if err != nil {
-			panic(err)
+			log.Printf("failed to log, reason: %#q", err.Error())
 		}
 	}
 
