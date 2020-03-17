@@ -46,16 +46,19 @@ func New(config Config) (*MicroLogger, error) {
 	return l, nil
 }
 
-func (l *MicroLogger) Log(keyVals ...interface{}) error {
+func (l *MicroLogger) Log(keyVals ...interface{}) {
 	keyVals = l.processStack(keyVals)
-	return l.logger.Log(keyVals...)
+	l.logger.Log(keyVals...)
 }
 
-func (l *MicroLogger) LogCtx(ctx context.Context, keyVals ...interface{}) error {
+func (l *MicroLogger) LogCtx(ctx context.Context, keyVals ...interface{}) {
 	keyVals = l.processStack(keyVals)
 	meta, ok := loggermeta.FromContext(ctx)
 	if !ok {
-		return l.logger.Log(keyVals...)
+		err := l.logger.Log(keyVals...)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	var newKeyVals []interface{}
@@ -68,7 +71,7 @@ func (l *MicroLogger) LogCtx(ctx context.Context, keyVals ...interface{}) error 
 		}
 	}
 
-	return l.logger.Log(newKeyVals...)
+	l.logger.Log(newKeyVals...)
 }
 
 func (l *MicroLogger) With(keyVals ...interface{}) Logger {
