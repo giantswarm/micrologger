@@ -63,6 +63,7 @@ func (l *MicroLogger) LogCtx(ctx context.Context, keyVals ...interface{}) {
 		if err != nil {
 			log.Printf("failed to log, reason: %#q", err.Error())
 		}
+		return
 	}
 
 	var newKeyVals []interface{}

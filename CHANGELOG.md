@@ -7,11 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Fixed
+
+- Fix LogCtx panic when no LoggerMeta is given.
+
+
+
 ## [0.3.0] 2020-03-17
 
 ## Changed
 
 - Remove error from the spec.
+
+
 
 ## [0.2.0] 2020-03-03
 
@@ -19,11 +27,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Switch to Go modules.
 
+
+
 ## [0.1.0] 2020-02-13
 
 ### Added
 
 - First release.
+
+
 
 [Unreleased]: https://github.com/giantswarm/micrologger/compare/v0.3.0...HEAD
 [0.3.0]: https://github.com/giantswarm/micrologger/compare/v0.2.0...v0.3.0

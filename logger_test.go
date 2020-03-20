@@ -163,6 +163,24 @@ func Test_MicroLogger(t *testing.T) {
 	}
 }
 
+// Test_MicroLogger_LogCtx ensures that logging with context does not panic in
+// case no "logger meta" is given".
+func Test_MicroLogger_LogCtx(t *testing.T) {
+	var err error
+
+	var logger Logger
+	{
+		c := Config{}
+
+		logger, err = New(c)
+		if err != nil {
+			t.Fatalf("err = %v, want %v", err, nil)
+		}
+	}
+
+	logger.LogCtx(context.Background(), "message", "test")
+}
+
 // normalizeToFileName converts all non-digit, non-letter runes in input string
 // to dash ('-'). Coalesces multiple dashes into one.
 func normalizeToFileName(s string) string {
