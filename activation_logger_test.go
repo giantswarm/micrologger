@@ -246,9 +246,8 @@ func Test_ActivationKeyLogger_shouldActivate_level(t *testing.T) {
 			ExpectedResult: true,
 		},
 
-		// Case 2, activation keys representing common log levels result in true
-		// when matching lower log levels. The activation key level/info matches the
-		// log level debug because debug is lower than info.
+		// Case 2, when asking for log level info we do not want to see debug
+		// logs.
 		{
 			Activations: map[string]interface{}{
 				"level": "info",
@@ -259,12 +258,11 @@ func Test_ActivationKeyLogger_shouldActivate_level(t *testing.T) {
 				"level",
 				"debug",
 			},
-			ExpectedResult: true,
+			ExpectedResult: false,
 		},
 
-		// Case 3, activation keys representing common log levels result in false
-		// when not matching lower log levels. The activation key level/info does
-		// not match the log level warning because warning is higher than info.
+		// Case 3, when asking for log level info we do want to see warning
+		// logs.
 		{
 			Activations: map[string]interface{}{
 				"level": "info",
@@ -275,12 +273,10 @@ func Test_ActivationKeyLogger_shouldActivate_level(t *testing.T) {
 				"level",
 				"warning",
 			},
-			ExpectedResult: false,
+			ExpectedResult: true,
 		},
 
-		// Case 4, activation keys representing common log levels result in false
-		// when not matching lower log levels. The activation key level/info does
-		// not match the log level error because error is higher than info.
+		// Case 4, when asking for log level info we want to see error logs.
 		{
 			Activations: map[string]interface{}{
 				"level": "info",
@@ -291,7 +287,7 @@ func Test_ActivationKeyLogger_shouldActivate_level(t *testing.T) {
 				"level",
 				"error",
 			},
-			ExpectedResult: false,
+			ExpectedResult: true,
 		},
 
 		// Case 5, log level and verbosity matches together result in true.
