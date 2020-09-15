@@ -146,7 +146,7 @@ func isLevelAllowed(keyVals []interface{}, aVal interface{}) bool {
 			continue
 		}
 
-		return activationLevel >= keyValsLevel
+		return activationLevel <= keyValsLevel
 	}
 
 	return false
