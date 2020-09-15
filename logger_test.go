@@ -121,7 +121,7 @@ func Test_MicroLogger(t *testing.T) {
 			{
 				// Don't flush on purpose. Logs should be
 				// flushed right after they are logged.
-				wCopy := []byte(w.String())
+				wCopy := []byte(w.String()) // nolint:gosimple
 				w.Reset()
 				err := json.Indent(w, wCopy, "", "\t")
 				if err != nil {
@@ -148,7 +148,10 @@ func Test_MicroLogger(t *testing.T) {
 
 			golden := filepath.Join("testdata", normalizeToFileName(tc.name)+".golden")
 			if *update {
-				ioutil.WriteFile(golden, actual, 0644)
+				err := ioutil.WriteFile(golden, actual, 0644) // nolint:gosec
+				if err != nil {
+					t.Fatal(err)
+				}
 			}
 
 			expected, err := ioutil.ReadFile(golden)
@@ -185,7 +188,7 @@ func Test_MicroLogger_LogCtx(t *testing.T) {
 // to dash ('-'). Coalesces multiple dashes into one.
 func normalizeToFileName(s string) string {
 	var result []rune
-	for _, r := range []rune(s) {
+	for _, r := range s {
 		if unicode.IsDigit(r) || unicode.IsLetter(r) {
 			result = append(result, r)
 		} else {
