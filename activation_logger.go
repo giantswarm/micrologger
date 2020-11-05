@@ -174,7 +174,7 @@ func isVerbosityAllowed(keyVals []interface{}, aVal interface{}) bool {
 		return activationVerbosity >= keyValsVerbosity
 	}
 
-	return false
+	return true
 }
 
 func shouldActivate(activations map[string]interface{}, keyVals []interface{}) (bool, error) {

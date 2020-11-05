@@ -408,6 +408,21 @@ func Test_ActivationKeyLogger_shouldActivate_verbosity(t *testing.T) {
 			},
 			ExpectedResult: false,
 		},
+
+		// Case 4, activation verbosity defined, but keyVals verbosity
+		// undefined. Results in true.
+		{
+			Activations: map[string]interface{}{
+				"verbosity": 6,
+			},
+			KeyVals: []interface{}{
+				"level",
+				"info",
+				"message",
+				"test",
+			},
+			ExpectedResult: true,
+		},
 	}
 
 	for i, tc := range testCases {
