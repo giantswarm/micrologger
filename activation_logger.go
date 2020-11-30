@@ -46,8 +46,6 @@ type activationLogger struct {
 type ctxActivationLogger struct {
 	ctx        context.Context
 	underlying Logger
-
-	activations map[string]interface{}
 }
 
 // NewActivation creates a new activation key logger. This logger kind can be
