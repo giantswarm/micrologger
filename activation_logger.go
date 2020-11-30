@@ -2,6 +2,7 @@ package micrologger
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/giantswarm/microerror"
@@ -42,6 +43,13 @@ type activationLogger struct {
 	activations map[string]interface{}
 }
 
+type ctxActivationLogger struct {
+	ctx        context.Context
+	underlying Logger
+
+	activations map[string]interface{}
+}
+
 // NewActivation creates a new activation key logger. This logger kind can be
 // used on command line tools to improve situations in which log filtering using
 // other command line tools like grep is not sufficient. Due to certain filter
@@ -76,11 +84,25 @@ func NewActivation(config ActivationLoggerConfig) (Logger, error) {
 
 	l := &activationLogger{
 		underlying: config.Underlying,
-
-		activations: config.Activations,
 	}
 
 	return l, nil
+}
+
+func (l *activationLogger) Debug(format string, params ...interface{}) {
+	l.Log("level", "debug", "message", fmt.Sprintf(format, params...))
+}
+
+func (l *activationLogger) Info(format string, params ...interface{}) {
+	l.Log("level", "info", "message", fmt.Sprintf(format, params...))
+}
+
+func (l *activationLogger) Warning(format string, params ...interface{}) {
+	l.Log("level", "warning", "message", fmt.Sprintf(format, params...))
+}
+
+func (l *activationLogger) Error(format string, params ...interface{}) {
+	l.Log("level", "error", "message", fmt.Sprintf(format, params...))
 }
 
 func (l *activationLogger) Log(keyVals ...interface{}) {
@@ -107,6 +129,48 @@ func (l *activationLogger) LogCtx(ctx context.Context, keyVals ...interface{}) {
 
 func (l *activationLogger) With(keyVals ...interface{}) Logger {
 	return l.underlying.With(keyVals...)
+}
+
+func (l *activationLogger) WithCtx(ctx context.Context) Logger {
+	return &ctxActivationLogger{
+		ctx:        ctx,
+		underlying: l,
+	}
+}
+
+func (l *ctxActivationLogger) Debug(format string, params ...interface{}) {
+	l.LogCtx(l.ctx, "level", "debug", "message", fmt.Sprintf(format, params...))
+}
+
+func (l *ctxActivationLogger) Info(format string, params ...interface{}) {
+	l.LogCtx(l.ctx, "level", "info", "message", fmt.Sprintf(format, params...))
+}
+
+func (l *ctxActivationLogger) Warning(format string, params ...interface{}) {
+	l.LogCtx(l.ctx, "level", "warning", "message", fmt.Sprintf(format, params...))
+}
+
+func (l *ctxActivationLogger) Error(format string, params ...interface{}) {
+	l.LogCtx(l.ctx, "level", "error", "message", fmt.Sprintf(format, params...))
+}
+
+func (l *ctxActivationLogger) Log(keyVals ...interface{}) {
+	l.underlying.Log(keyVals...)
+}
+
+func (l *ctxActivationLogger) LogCtx(ctx context.Context, keyVals ...interface{}) {
+	l.underlying.LogCtx(ctx, keyVals...)
+}
+
+func (l *ctxActivationLogger) With(keyVals ...interface{}) Logger {
+	return l.underlying.With(keyVals...)
+}
+
+func (l *ctxActivationLogger) WithCtx(ctx context.Context) Logger {
+	return &ctxActivationLogger{
+		ctx:        ctx,
+		underlying: l,
+	}
 }
 
 func valueFor(keyVals []interface{}, key string) (interface{}, bool) {

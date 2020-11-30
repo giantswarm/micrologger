@@ -4,6 +4,7 @@ package micrologger
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 
@@ -20,6 +21,11 @@ type Config struct {
 
 type MicroLogger struct {
 	logger kitlog.Logger
+}
+
+type CtxMicroLogger struct {
+	ctx        context.Context
+	underlying Logger
 }
 
 func New(config Config) (*MicroLogger, error) {
@@ -45,6 +51,22 @@ func New(config Config) (*MicroLogger, error) {
 	}
 
 	return l, nil
+}
+
+func (l *MicroLogger) Debug(format string, params ...interface{}) {
+	l.Log("level", "debug", "message", fmt.Sprintf(format, params...))
+}
+
+func (l *MicroLogger) Info(format string, params ...interface{}) {
+	l.Log("level", "info", "message", fmt.Sprintf(format, params...))
+}
+
+func (l *MicroLogger) Warning(format string, params ...interface{}) {
+	l.Log("level", "warning", "message", fmt.Sprintf(format, params...))
+}
+
+func (l *MicroLogger) Error(format string, params ...interface{}) {
+	l.Log("level", "error", "message", fmt.Sprintf(format, params...))
 }
 
 func (l *MicroLogger) Log(keyVals ...interface{}) {
@@ -89,6 +111,13 @@ func (l *MicroLogger) With(keyVals ...interface{}) Logger {
 	}
 }
 
+func (l *MicroLogger) WithCtx(ctx context.Context) Logger {
+	return &CtxMicroLogger{
+		ctx:        ctx,
+		underlying: l,
+	}
+}
+
 func (l *MicroLogger) processStack(keyVals []interface{}) []interface{} {
 	for i := 1; i < len(keyVals); i += 2 {
 		k := keyVals[i-1]
@@ -128,4 +157,39 @@ func (l *MicroLogger) processStack(keyVals []interface{}) []interface{} {
 	}
 
 	return keyVals
+}
+
+func (l *CtxMicroLogger) Debug(format string, params ...interface{}) {
+	l.LogCtx(l.ctx, "level", "debug", "message", fmt.Sprintf(format, params...))
+}
+
+func (l *CtxMicroLogger) Info(format string, params ...interface{}) {
+	l.LogCtx(l.ctx, "level", "info", "message", fmt.Sprintf(format, params...))
+}
+
+func (l *CtxMicroLogger) Warning(format string, params ...interface{}) {
+	l.LogCtx(l.ctx, "level", "warning", "message", fmt.Sprintf(format, params...))
+}
+
+func (l *CtxMicroLogger) Error(format string, params ...interface{}) {
+	l.LogCtx(l.ctx, "level", "error", "message", fmt.Sprintf(format, params...))
+}
+
+func (l *CtxMicroLogger) Log(keyVals ...interface{}) {
+	l.underlying.Log(keyVals...)
+}
+
+func (l *CtxMicroLogger) LogCtx(ctx context.Context, keyVals ...interface{}) {
+	l.underlying.LogCtx(ctx, keyVals...)
+}
+
+func (l *CtxMicroLogger) With(keyVals ...interface{}) Logger {
+	return l.underlying.With(keyVals...)
+}
+
+func (l *CtxMicroLogger) WithCtx(ctx context.Context) Logger {
+	return &CtxMicroLogger{
+		ctx:        ctx,
+		underlying: l,
+	}
 }

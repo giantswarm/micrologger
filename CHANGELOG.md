@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Convenience shorthands for common log levels added to Logger.
+
 ## [0.3.4] - 2020-11-05
 
 ### Fixed
