@@ -4,9 +4,11 @@ package micrologger
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 
+	"github.com/giantswarm/microerror"
 	kitlog "github.com/go-kit/kit/log"
 
 	"github.com/giantswarm/micrologger/loggermeta"
@@ -45,6 +47,18 @@ func New(config Config) (*MicroLogger, error) {
 	}
 
 	return l, nil
+}
+
+func (l *MicroLogger) Debugf(ctx context.Context, format string, params ...interface{}) {
+	l.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf(format, params...))
+}
+
+func (l *MicroLogger) Errorf(ctx context.Context, err error, format string, params ...interface{}) {
+	if err != nil {
+		l.LogCtx(ctx, "level", "error", "message", fmt.Sprintf(format, params...), "stack", microerror.JSON(err))
+	} else {
+		l.LogCtx(ctx, "level", "error", "message", fmt.Sprintf(format, params...))
+	}
 }
 
 func (l *MicroLogger) Log(keyVals ...interface{}) {
