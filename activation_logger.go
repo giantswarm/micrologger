@@ -89,7 +89,11 @@ func (l *activationLogger) Debugf(ctx context.Context, format string, params ...
 }
 
 func (l *activationLogger) Errorf(ctx context.Context, err error, format string, params ...interface{}) {
-	l.LogCtx(ctx, "level", "error", "message", fmt.Sprintf(format, params...), "stack", microerror.JSON(err))
+	if err != nil {
+		l.LogCtx(ctx, "level", "error", "message", fmt.Sprintf(format, params...), "stack", microerror.JSON(err))
+	} else {
+		l.LogCtx(ctx, "level", "error", "message", fmt.Sprintf(format, params...))
+	}
 }
 
 func (l *activationLogger) Log(keyVals ...interface{}) {
