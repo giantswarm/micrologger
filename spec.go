@@ -11,8 +11,10 @@ type Logger interface {
 	Info(format string, params ...interface{})
 	// Warning takes a format string and parameters and writes them in warning level.
 	Warning(format string, params ...interface{})
-	// Error takes a format string and parameters and writes them in error level.
-	Error(format string, params ...interface{})
+	// Error takes an error, a format string and parameters and writes them in
+	// error level. The error stack trace is written as "stack" value log
+	// entry.
+	Error(err error, format string, params ...interface{})
 	// Log takes a sequence of alternating key/value pairs which are used
 	// to create the log message structure.
 	Log(keyVals ...interface{})

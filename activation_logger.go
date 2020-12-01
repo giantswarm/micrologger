@@ -99,8 +99,8 @@ func (l *activationLogger) Warning(format string, params ...interface{}) {
 	l.Log("level", "warning", "message", fmt.Sprintf(format, params...))
 }
 
-func (l *activationLogger) Error(format string, params ...interface{}) {
-	l.Log("level", "error", "message", fmt.Sprintf(format, params...))
+func (l *activationLogger) Error(err error, format string, params ...interface{}) {
+	l.Log("level", "error", "message", fmt.Sprintf(format, params...), "stack", microerror.JSON(err))
 }
 
 func (l *activationLogger) Log(keyVals ...interface{}) {
@@ -148,8 +148,8 @@ func (l *ctxActivationLogger) Warning(format string, params ...interface{}) {
 	l.LogCtx(l.ctx, "level", "warning", "message", fmt.Sprintf(format, params...))
 }
 
-func (l *ctxActivationLogger) Error(format string, params ...interface{}) {
-	l.LogCtx(l.ctx, "level", "error", "message", fmt.Sprintf(format, params...))
+func (l *ctxActivationLogger) Error(err error, format string, params ...interface{}) {
+	l.LogCtx(l.ctx, "level", "error", "message", fmt.Sprintf(format, params...), "stack", microerror.JSON(err))
 }
 
 func (l *ctxActivationLogger) Log(keyVals ...interface{}) {

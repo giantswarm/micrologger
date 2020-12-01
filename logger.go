@@ -10,6 +10,7 @@ import (
 
 	kitlog "github.com/go-kit/kit/log"
 
+	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger/loggermeta"
 )
 
@@ -65,8 +66,8 @@ func (l *MicroLogger) Warning(format string, params ...interface{}) {
 	l.Log("level", "warning", "message", fmt.Sprintf(format, params...))
 }
 
-func (l *MicroLogger) Error(format string, params ...interface{}) {
-	l.Log("level", "error", "message", fmt.Sprintf(format, params...))
+func (l *MicroLogger) Error(err error, format string, params ...interface{}) {
+	l.Log("level", "error", "message", fmt.Sprintf(format, params...), "stack", microerror.JSON(err))
 }
 
 func (l *MicroLogger) Log(keyVals ...interface{}) {
@@ -171,8 +172,8 @@ func (l *CtxMicroLogger) Warning(format string, params ...interface{}) {
 	l.LogCtx(l.ctx, "level", "warning", "message", fmt.Sprintf(format, params...))
 }
 
-func (l *CtxMicroLogger) Error(format string, params ...interface{}) {
-	l.LogCtx(l.ctx, "level", "error", "message", fmt.Sprintf(format, params...))
+func (l *CtxMicroLogger) Error(err error, format string, params ...interface{}) {
+	l.LogCtx(l.ctx, "level", "error", "message", fmt.Sprintf(format, params...), "stack", microerror.JSON(err))
 }
 
 func (l *CtxMicroLogger) Log(keyVals ...interface{}) {
