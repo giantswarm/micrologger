@@ -77,6 +77,8 @@ func NewActivation(config ActivationLoggerConfig) (Logger, error) {
 
 	l := &activationLogger{
 		underlying: config.Underlying,
+
+		activations: config.Activations,
 	}
 
 	return l, nil
