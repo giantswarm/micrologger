@@ -5,16 +5,13 @@ import "context"
 // Logger is a simple interface describing services that emit messages to
 // gather certain runtime information.
 type Logger interface {
-	// Debug takes a format string and parameters and writes them in debug level.
-	Debug(format string, params ...interface{})
-	// Info takes a format string and parameters and writes them in info level.
-	Info(format string, params ...interface{})
-	// Warning takes a format string and parameters and writes them in warning level.
-	Warning(format string, params ...interface{})
-	// Error takes an error, a format string and parameters and writes them in
+	// Debugf takes a format string and parameters and writes them in debug
+	// level.
+	Debugf(ctx context.Context, format string, params ...interface{})
+	// Errorf takes an error, a format string and parameters and writes them in
 	// error level. The error stack trace is written as "stack" value log
 	// entry.
-	Error(err error, format string, params ...interface{})
+	Errorf(ctx context.Context, err error, format string, params ...interface{})
 	// Log takes a sequence of alternating key/value pairs which are used
 	// to create the log message structure.
 	Log(keyVals ...interface{})
@@ -26,6 +23,4 @@ type Logger interface {
 	// passed to calls to Log. If logger is also a contextual logger
 	// created by With, keyVals is appended to the existing context.
 	With(keyVals ...interface{}) Logger
-	// WithCtx returns a context specific logger for given parameter.
-	WithCtx(ctx context.Context) Logger
 }
