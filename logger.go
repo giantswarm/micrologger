@@ -8,9 +8,9 @@ import (
 	"io"
 	"log"
 
+	"github.com/giantswarm/microerror"
 	kitlog "github.com/go-kit/kit/log"
 
-	"github.com/giantswarm/microerror"
 	"github.com/giantswarm/micrologger/loggermeta"
 )
 
