@@ -9,18 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix caller for Logger.Debugf and Logger.Errorf.
+
+
+
 ## [0.4.0] - 2020-12-01
 
 ### Added
 
-- Convenience shorthands for common log levels added to Logger.
+- Add Logger.Debugf and Logger.Errorf.
+
+
 
 ## [0.3.4] - 2020-11-05
 
 ### Fixed
 
 - Fix `isVerbosityAllowed` default case (log verbosity undefined).
-
 
 ## [0.3.3] - 2020-09-15
 

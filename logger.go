@@ -50,60 +50,75 @@ func New(config Config) (*MicroLogger, error) {
 }
 
 func (l *MicroLogger) Debugf(ctx context.Context, format string, params ...interface{}) {
-	l.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf(format, params...))
+	kvs := []interface{}{
+		"level", "debug",
+		"message", fmt.Sprintf(format, params...),
+	}
+
+	l.log(keyValsWithMeta(ctx, kvs))
 }
 
 func (l *MicroLogger) Errorf(ctx context.Context, err error, format string, params ...interface{}) {
+	var kvs []interface{}
 	if err != nil {
-		l.LogCtx(ctx, "level", "error", "message", fmt.Sprintf(format, params...), "stack", microerror.JSON(err))
+		kvs = []interface{}{
+			"level", "error",
+			"message", fmt.Sprintf(format, params...),
+			"stack", microerror.JSON(err),
+		}
 	} else {
-		l.LogCtx(ctx, "level", "error", "message", fmt.Sprintf(format, params...))
+		kvs = []interface{}{
+			"level", "error",
+			"message", fmt.Sprintf(format, params...),
+		}
 	}
+
+	l.log(keyValsWithMeta(ctx, kvs))
 }
 
 func (l *MicroLogger) Log(keyVals ...interface{}) {
-	keyVals = l.processStack(keyVals)
-	err := l.logger.Log(keyVals...)
-	if err != nil {
-		log.Printf("failed to log, reason: %#q", err.Error())
-	}
+	l.log(processStack(keyVals))
 }
 
 func (l *MicroLogger) LogCtx(ctx context.Context, keyVals ...interface{}) {
-	keyVals = l.processStack(keyVals)
-	meta, ok := loggermeta.FromContext(ctx)
-	if !ok {
-		err := l.logger.Log(keyVals...)
-		if err != nil {
-			log.Printf("failed to log, reason: %#q", err.Error())
-		}
-		return
-	}
-
-	var newKeyVals []interface{}
-	{
-		newKeyVals = append(newKeyVals, keyVals...)
-
-		for k, v := range meta.KeyVals {
-			newKeyVals = append(newKeyVals, k)
-			newKeyVals = append(newKeyVals, v)
-		}
-	}
-
-	err := l.logger.Log(newKeyVals...)
-	if err != nil {
-		log.Printf("failed to log, reason: %#q", err.Error())
-	}
+	l.log(keyValsWithMeta(ctx, keyVals))
 }
 
 func (l *MicroLogger) With(keyVals ...interface{}) Logger {
-	keyVals = l.processStack(keyVals)
+	keyVals = processStack(keyVals)
 	return &MicroLogger{
 		logger: kitlog.With(l.logger, keyVals...),
 	}
 }
 
-func (l *MicroLogger) processStack(keyVals []interface{}) []interface{} {
+func (l *MicroLogger) log(keyVals []interface{}) {
+	err := l.logger.Log(keyVals...)
+	if err != nil {
+		log.Printf("failed to log with error: %#q, keyVals = %v", err.Error(), keyVals)
+	}
+}
+
+func keyValsWithMeta(ctx context.Context, keyVals []interface{}) []interface{} {
+	keyVals = processStack(keyVals)
+	meta, ok := loggermeta.FromContext(ctx)
+	if !ok {
+		return keyVals
+	}
+
+	var kvs []interface{}
+	{
+		kvs = append(kvs, keyVals...)
+
+		for k, v := range meta.KeyVals {
+			kvs = append(kvs, k)
+			kvs = append(kvs, v)
+		}
+	}
+
+	return kvs
+}
+
+func processStack(keyVals []interface{}) []interface{} {
 	for i := 1; i < len(keyVals); i += 2 {
 		k := keyVals[i-1]
 		v := keyVals[i]
