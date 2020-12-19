@@ -9,6 +9,6 @@ import (
 
 func newCallerFunc(skip int) kitlog.Valuer {
 	return func() interface{} {
-		return fmt.Sprintf("%+v", stack.Caller(4+skip))
+		return fmt.Sprintf("%+v", stack.Caller(5+skip))
 	}
 }
