@@ -76,7 +76,7 @@ func NewActivation(config ActivationLoggerConfig) (Logger, error) {
 	}
 
 	l := &activationLogger{
-		underlying: config.Underlying,
+		underlying: config.Underlying.WithIncreasedCallerDepth(),
 
 		activations: config.Activations,
 	}
@@ -120,6 +120,10 @@ func (l *activationLogger) LogCtx(ctx context.Context, keyVals ...interface{}) {
 
 func (l *activationLogger) With(keyVals ...interface{}) Logger {
 	return l.underlying.With(keyVals...)
+}
+
+func (l *activationLogger) WithIncreasedCallerDepth() Logger {
+	return l.underlying.WithIncreasedCallerDepth()
 }
 
 func valueFor(keyVals []interface{}, key string) (interface{}, bool) {

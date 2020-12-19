@@ -118,6 +118,12 @@ func keyValsWithMeta(ctx context.Context, keyVals []interface{}) []interface{} {
 	return kvs
 }
 
+func (l *MicroLogger) WithIncreasedCallerDepth() Logger {
+	return &MicroLogger{
+		logger: kitlog.With(l.logger, "caller", newCallerFunc(1)),
+	}
+}
+
 func processStack(keyVals []interface{}) []interface{} {
 	for i := 1; i < len(keyVals); i += 2 {
 		k := keyVals[i-1]
