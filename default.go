@@ -1,19 +1,16 @@
 package micrologger
 
 import (
-	"fmt"
 	"os"
 	"time"
 
-	"github.com/go-stack/stack"
+	kitlog "github.com/go-kit/kit/log"
 )
 
-var DefaultCaller = func() interface{} {
-	return fmt.Sprintf("%+v", stack.Caller(5))
-}
+var DefaultCaller = newCallerFunc(0)
 
 var DefaultIOWriter = os.Stdout
 
-var DefaultTimestampFormatter = func() interface{} {
+var DefaultTimestampFormatter kitlog.Valuer = func() interface{} {
 	return time.Now().UTC().Format("2006-01-02T15:04:05.999999-07:00")
 }

@@ -9,9 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add Logger.WithIncreasedCallerDepth to support wrapping in other interfaces.
+
 ### Fixed
 
 - Fix caller for Logger.Debugf and Logger.Errorf.
+- Fix caller in ActivationLogger.
 
 
 

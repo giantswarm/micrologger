@@ -23,4 +23,7 @@ type Logger interface {
 	// passed to calls to Log. If logger is also a contextual logger
 	// created by With, keyVals is appended to the existing context.
 	With(keyVals ...interface{}) Logger
+	// WithIncreasedCallerDepth is useful when wrapping with another
+	// interface to pass it as dependency to a library outside Giant Swarm.
+	WithIncreasedCallerDepth() Logger
 }
