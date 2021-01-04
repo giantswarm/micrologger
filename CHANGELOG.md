@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2021-01-04
+
 ### Added
 
 - Add Logger.WithIncreasedCallerDepth to support wrapping in other interfaces.
@@ -82,7 +84,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/micrologger/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/giantswarm/micrologger/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/giantswarm/micrologger/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/giantswarm/micrologger/compare/v0.3.4...v0.4.0
 [0.3.4]: https://github.com/giantswarm/micrologger/compare/v0.3.3...v0.3.4
 [0.3.3]: https://github.com/giantswarm/micrologger/compare/v0.3.2...v0.3.3
