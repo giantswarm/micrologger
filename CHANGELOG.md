@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Upgrade go-kit/kit/log to go-kit/log
+
 ## [0.5.0] - 2021-01-04
 
 ### Added
