@@ -1,6 +1,6 @@
 module github.com/giantswarm/micrologger
 
-go 1.14
+go 1.17
 
 require (
 	github.com/giantswarm/microerror v0.3.0
@@ -8,6 +8,8 @@ require (
 	github.com/go-stack/stack v1.8.0
 	github.com/google/go-cmp v0.5.4
 )
+
+require github.com/go-logfmt/logfmt v0.5.1 // indirect
 
 // We do not directly use the websocket package but within the dependency graph
 // this package is necessary. We have to make sure it is at least at v1.4.2 due
