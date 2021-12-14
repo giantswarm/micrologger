@@ -4,7 +4,7 @@ import (
 	"os"
 	"time"
 
-	kitlog "github.com/go-kit/kit/log"
+	kitlog "github.com/go-kit/log"
 )
 
 var DefaultCaller = newCallerFunc(0)
