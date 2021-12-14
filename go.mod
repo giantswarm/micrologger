@@ -9,7 +9,7 @@ require (
 	github.com/google/go-cmp v0.5.4
 )
 
-require github.com/go-logfmt/logfmt v0.5.0 // indirect
+require github.com/go-logfmt/logfmt v0.5.1 // indirect
 
 // We do not directly use the websocket package but within the dependency graph
 // this package is necessary. We have to make sure it is at least at v1.4.2 due
