@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Upgrade to Go 1.17
+- Upgrade go-kit/kit/log to go-kit/log
 
 ## [0.5.0] - 2021-01-04
 
