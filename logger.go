@@ -98,7 +98,7 @@ func (l *MicroLogger) Info(ctx context.Context, message string) {
 }
 
 func (l *MicroLogger) Infof(ctx context.Context, format string, params ...interface{}) {
-	l.Debug(ctx, fmt.Sprintf(format, params...))
+	l.Info(ctx, fmt.Sprintf(format, params...))
 }
 
 func (l *MicroLogger) Log(keyVals ...interface{}) {
