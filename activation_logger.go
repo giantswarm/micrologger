@@ -43,6 +43,22 @@ type activationLogger struct {
 	activations map[string]interface{}
 }
 
+func (l *activationLogger) Error(ctx context.Context, err error, message string) {
+	if err != nil {
+		l.LogCtx(ctx, "level", "error", "message", message, "stack", microerror.JSON(err))
+	} else {
+		l.LogCtx(ctx, "level", "error", "message", message)
+	}
+}
+
+func (l *activationLogger) Info(ctx context.Context, message string) {
+	l.LogCtx(ctx, "level", "debug", "message", message)
+}
+
+func (l *activationLogger) Infof(ctx context.Context, format string, params ...interface{}) {
+	l.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf(format, params...))
+}
+
 // NewActivation creates a new activation key logger. This logger kind can be
 // used on command line tools to improve situations in which log filtering using
 // other command line tools like grep is not sufficient. Due to certain filter
@@ -84,16 +100,16 @@ func NewActivation(config ActivationLoggerConfig) (Logger, error) {
 	return l, nil
 }
 
+func (l *activationLogger) Debug(ctx context.Context, message string) {
+	l.LogCtx(ctx, "level", "debug", "message", message)
+}
+
 func (l *activationLogger) Debugf(ctx context.Context, format string, params ...interface{}) {
-	l.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf(format, params...))
+	l.Debug(ctx, fmt.Sprintf(format, params...))
 }
 
 func (l *activationLogger) Errorf(ctx context.Context, err error, format string, params ...interface{}) {
-	if err != nil {
-		l.LogCtx(ctx, "level", "error", "message", fmt.Sprintf(format, params...), "stack", microerror.JSON(err))
-	} else {
-		l.LogCtx(ctx, "level", "error", "message", fmt.Sprintf(format, params...))
-	}
+	l.Error(ctx, err, fmt.Sprintf(format, params...))
 }
 
 func (l *activationLogger) Log(keyVals ...interface{}) {

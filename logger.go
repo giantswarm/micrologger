@@ -10,6 +10,7 @@ import (
 
 	"github.com/giantswarm/microerror"
 	kitlog "github.com/go-kit/log"
+	"github.com/go-logr/logr"
 
 	"github.com/giantswarm/micrologger/loggermeta"
 )
@@ -21,7 +22,10 @@ type Config struct {
 }
 
 type MicroLogger struct {
-	logger kitlog.Logger
+	info      logr.RuntimeInfo
+	logger    kitlog.Logger
+	verbosity int
+	names     []string
 }
 
 func New(config Config) (*MicroLogger, error) {
@@ -49,31 +53,52 @@ func New(config Config) (*MicroLogger, error) {
 	return l, nil
 }
 
-func (l *MicroLogger) Debugf(ctx context.Context, format string, params ...interface{}) {
+func (l *MicroLogger) Debug(ctx context.Context, message string) {
 	kvs := []interface{}{
 		"level", "debug",
-		"message", fmt.Sprintf(format, params...),
+		"message", message,
+	}
+
+	l.log(keyValsWithMeta(ctx, kvs))
+}
+
+func (l *MicroLogger) Debugf(ctx context.Context, format string, params ...interface{}) {
+	l.Debug(ctx, fmt.Sprintf(format, params...))
+}
+
+func (l *MicroLogger) Error(ctx context.Context, err error, message string) {
+	var kvs []interface{}
+	if err != nil {
+		kvs = []interface{}{
+			"level", "error",
+			"message", message,
+			"stack", microerror.JSON(err),
+		}
+	} else {
+		kvs = []interface{}{
+			"level", "error",
+			"message", message,
+		}
 	}
 
 	l.log(keyValsWithMeta(ctx, kvs))
 }
 
 func (l *MicroLogger) Errorf(ctx context.Context, err error, format string, params ...interface{}) {
-	var kvs []interface{}
-	if err != nil {
-		kvs = []interface{}{
-			"level", "error",
-			"message", fmt.Sprintf(format, params...),
-			"stack", microerror.JSON(err),
-		}
-	} else {
-		kvs = []interface{}{
-			"level", "error",
-			"message", fmt.Sprintf(format, params...),
-		}
+	l.Error(ctx, err, fmt.Sprintf(format, params...))
+}
+
+func (l *MicroLogger) Info(ctx context.Context, message string) {
+	kvs := []interface{}{
+		"level", "info",
+		"message", message,
 	}
 
 	l.log(keyValsWithMeta(ctx, kvs))
+}
+
+func (l *MicroLogger) Infof(ctx context.Context, format string, params ...interface{}) {
+	l.Debug(ctx, fmt.Sprintf(format, params...))
 }
 
 func (l *MicroLogger) Log(keyVals ...interface{}) {
@@ -84,11 +109,19 @@ func (l *MicroLogger) LogCtx(ctx context.Context, keyVals ...interface{}) {
 	l.log(keyValsWithMeta(ctx, keyVals))
 }
 
-func (l *MicroLogger) With(keyVals ...interface{}) Logger {
-	keyVals = processStack(keyVals)
+func (l *MicroLogger) deepCopy() *MicroLogger {
 	return &MicroLogger{
-		logger: kitlog.With(l.logger, keyVals...),
+		info:      l.info,
+		logger:    l.logger,
+		verbosity: l.verbosity,
+		names:     l.names[:],
 	}
+}
+
+func (l *MicroLogger) With(keyVals ...interface{}) Logger {
+	loggerCopy := l.deepCopy()
+	loggerCopy.logger = kitlog.With(loggerCopy.logger, keyVals...)
+	return loggerCopy
 }
 
 func (l *MicroLogger) log(keyVals []interface{}) {
@@ -163,4 +196,12 @@ func processStack(keyVals []interface{}) []interface{} {
 	}
 
 	return keyVals
+}
+
+func (l *MicroLogger) AsSink(verbosity int) logr.LogSink {
+	loggerCopy := l.deepCopy()
+	loggerCopy.verbosity = verbosity
+	return &LogrSink{
+		MicroLogger: loggerCopy,
+	}
 }
