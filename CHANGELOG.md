@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add `Info` and `Infof` methods which log a message or a format string
+  with parameters (respectively) at the "info" level.
+- Add `Debug` and `Error` methods which log plain string messages similar
+  to `Debugf` and `Errorf` without the string formatting functionality.
+- Add `AsSink` method which returns a wrapped instance of the logger which
+  satisfies the `logr.LogSink` interface so it can be used with `klog` and
+  `controller-runtime`.
+
 ## [0.6.0] - 2021-12-14
 
 ### Changed
