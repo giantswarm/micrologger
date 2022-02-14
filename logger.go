@@ -88,19 +88,6 @@ func (l *MicroLogger) Errorf(ctx context.Context, err error, format string, para
 	l.Error(ctx, err, fmt.Sprintf(format, params...))
 }
 
-func (l *MicroLogger) Info(ctx context.Context, message string) {
-	kvs := []interface{}{
-		"level", "info",
-		"message", message,
-	}
-
-	l.log(keyValsWithMeta(ctx, kvs))
-}
-
-func (l *MicroLogger) Infof(ctx context.Context, format string, params ...interface{}) {
-	l.Info(ctx, fmt.Sprintf(format, params...))
-}
-
 func (l *MicroLogger) Log(keyVals ...interface{}) {
 	l.log(processStack(keyVals))
 }

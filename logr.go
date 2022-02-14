@@ -25,7 +25,7 @@ func (l *LogrSink) Info(level int, msg string, keysAndValues ...interface{}) {
 	if l.verbosity < level {
 		return
 	}
-	keysAndValues = append(keysAndValues, l.getValues("info")...)
+	keysAndValues = append(keysAndValues, l.getValues("debug")...)
 	l.With(keysAndValues...).Log("message", msg)
 }
 

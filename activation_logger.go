@@ -104,14 +104,6 @@ func (l *activationLogger) Errorf(ctx context.Context, err error, format string,
 	l.Error(ctx, err, fmt.Sprintf(format, params...))
 }
 
-func (l *activationLogger) Info(ctx context.Context, message string) {
-	l.LogCtx(ctx, "level", "debug", "message", message)
-}
-
-func (l *activationLogger) Infof(ctx context.Context, format string, params ...interface{}) {
-	l.Info(ctx, fmt.Sprintf(format, params...))
-}
-
 func (l *activationLogger) Log(keyVals ...interface{}) {
 	activated, err := shouldActivate(l.activations, keyVals)
 	if err != nil {

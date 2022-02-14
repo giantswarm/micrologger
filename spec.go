@@ -16,10 +16,6 @@ type Logger interface {
 	// error level. The error stack trace is written as "stack" value log
 	// entry.
 	Errorf(ctx context.Context, err error, format string, params ...interface{})
-	// Info writes the given message in info level.
-	Info(ctx context.Context, message string)
-	// Infof takes a format string and parameters and writes them in info level.
-	Infof(ctx context.Context, format string, params ...interface{})
 	// Log takes a sequence of alternating key/value pairs which are used
 	// to create the log message structure.
 	Log(keyVals ...interface{})
