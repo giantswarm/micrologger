@@ -109,7 +109,7 @@ func (l *activationLogger) Info(ctx context.Context, message string) {
 }
 
 func (l *activationLogger) Infof(ctx context.Context, format string, params ...interface{}) {
-	l.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf(format, params...))
+	l.Info(ctx, fmt.Sprintf(format, params...))
 }
 
 func (l *activationLogger) Log(keyVals ...interface{}) {
