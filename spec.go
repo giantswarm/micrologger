@@ -5,9 +5,13 @@ import "context"
 // Logger is a simple interface describing services that emit messages to
 // gather certain runtime information.
 type Logger interface {
-	// Debugf takes a format string and parameters and writes them in debug
-	// level.
+	// Debug writes the given message in debug level.
+	Debug(ctx context.Context, message string)
+	// Debugf takes a format string and parameters and writes them in debug level.
 	Debugf(ctx context.Context, format string, params ...interface{})
+	// Error takes an error and a message and writes them in error level. The
+	// error stack trace is written as "stack" value log entry.
+	Error(ctx context.Context, err error, message string)
 	// Errorf takes an error, a format string and parameters and writes them in
 	// error level. The error stack trace is written as "stack" value log
 	// entry.

@@ -84,16 +84,24 @@ func NewActivation(config ActivationLoggerConfig) (Logger, error) {
 	return l, nil
 }
 
+func (l *activationLogger) Debug(ctx context.Context, message string) {
+	l.LogCtx(ctx, "level", "debug", "message", message)
+}
+
 func (l *activationLogger) Debugf(ctx context.Context, format string, params ...interface{}) {
-	l.LogCtx(ctx, "level", "debug", "message", fmt.Sprintf(format, params...))
+	l.Debug(ctx, fmt.Sprintf(format, params...))
+}
+
+func (l *activationLogger) Error(ctx context.Context, err error, message string) {
+	if err != nil {
+		l.LogCtx(ctx, "level", "error", "message", message, "stack", microerror.JSON(err))
+	} else {
+		l.LogCtx(ctx, "level", "error", "message", message)
+	}
 }
 
 func (l *activationLogger) Errorf(ctx context.Context, err error, format string, params ...interface{}) {
-	if err != nil {
-		l.LogCtx(ctx, "level", "error", "message", fmt.Sprintf(format, params...), "stack", microerror.JSON(err))
-	} else {
-		l.LogCtx(ctx, "level", "error", "message", fmt.Sprintf(format, params...))
-	}
+	l.Error(ctx, err, fmt.Sprintf(format, params...))
 }
 
 func (l *activationLogger) Log(keyVals ...interface{}) {
