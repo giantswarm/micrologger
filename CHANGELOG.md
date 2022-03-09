@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2022-03-01
+
 ### Added
 
 - Add `Debug` and `Error` methods which log plain string messages similar
@@ -99,7 +101,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-[Unreleased]: https://github.com/giantswarm/micrologger/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/giantswarm/micrologger/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/giantswarm/micrologger/compare/v0.6.0...v1.0.0
 [0.6.0]: https://github.com/giantswarm/micrologger/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/giantswarm/micrologger/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/giantswarm/micrologger/compare/v0.3.4...v0.4.0
