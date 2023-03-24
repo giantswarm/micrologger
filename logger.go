@@ -51,8 +51,16 @@ func New(config Config) (*MicroLogger, error) {
 		kitLogger = kitlog.NewJSONLogger(kitlog.NewSyncWriter(config.IOWriter))
 	}
 
+	logger := kitlog.LoggerFunc(func(keyVals ...interface{}) error {
+		err := kitLogger.Log(keyVals...)
+		if err != nil {
+			log.Printf("failed to log with error: %#q, keyVals = %v", err.Error(), keyVals)
+		}
+		return nil
+	})
+
 	kitLogger = kitlog.With(
-		kitLogger,
+		logger,
 		"caller", config.Caller,
 		"time", config.TimestampFormatter,
 	)
@@ -74,7 +82,7 @@ func (l *MicroLogger) Debug(ctx context.Context, message string) {
 		"message", message,
 	}
 
-	l.log(keyValsWithMeta(ctx, kvs))
+	level.Debug(l.logger).Log(keyValsWithMeta(ctx, kvs))
 }
 
 func (l *MicroLogger) Debugf(ctx context.Context, format string, params ...interface{}) {
@@ -96,7 +104,7 @@ func (l *MicroLogger) Error(ctx context.Context, err error, message string) {
 		}
 	}
 
-	l.log(keyValsWithMeta(ctx, kvs))
+	level.Error(l.logger).Log(keyValsWithMeta(ctx, kvs))
 }
 
 func (l *MicroLogger) Errorf(ctx context.Context, err error, format string, params ...interface{}) {
@@ -104,11 +112,11 @@ func (l *MicroLogger) Errorf(ctx context.Context, err error, format string, para
 }
 
 func (l *MicroLogger) Log(keyVals ...interface{}) {
-	l.log(processStack(keyVals))
+	l.logger.Log(processStack(keyVals))
 }
 
 func (l *MicroLogger) LogCtx(ctx context.Context, keyVals ...interface{}) {
-	l.log(keyValsWithMeta(ctx, keyVals))
+	l.logger.Log(keyValsWithMeta(ctx, keyVals))
 }
 
 func (l *MicroLogger) deepCopy() *MicroLogger {
@@ -124,13 +132,6 @@ func (l *MicroLogger) With(keyVals ...interface{}) Logger {
 	loggerCopy := l.deepCopy()
 	loggerCopy.logger = kitlog.With(loggerCopy.logger, keyVals...)
 	return loggerCopy
-}
-
-func (l *MicroLogger) log(keyVals []interface{}) {
-	err := l.logger.Log(keyVals...)
-	if err != nil {
-		log.Printf("failed to log with error: %#q, keyVals = %v", err.Error(), keyVals)
-	}
 }
 
 func keyValsWithMeta(ctx context.Context, keyVals []interface{}) []interface{} {
