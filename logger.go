@@ -51,6 +51,12 @@ func New(config Config) (*MicroLogger, error) {
 		kitLogger = kitlog.NewJSONLogger(kitlog.NewSyncWriter(config.IOWriter))
 	}
 
+	kitLogger = kitlog.With(
+		kitLogger,
+		"caller", config.Caller,
+		"time", config.TimestampFormatter,
+	)
+
 	logger := kitlog.LoggerFunc(func(keyVals ...interface{}) error {
 		err := kitLogger.Log(keyVals...)
 		if err != nil {
@@ -59,14 +65,8 @@ func New(config Config) (*MicroLogger, error) {
 		return nil
 	})
 
-	kitLogger = kitlog.With(
-		logger,
-		"caller", config.Caller,
-		"time", config.TimestampFormatter,
-	)
-
 	l := &MicroLogger{
-		logger: kitLogger,
+		logger: logger,
 	}
 
 	return l, nil
