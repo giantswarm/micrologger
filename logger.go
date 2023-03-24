@@ -11,6 +11,7 @@ import (
 
 	"github.com/giantswarm/microerror"
 	kitlog "github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 	"github.com/go-logr/logr"
 
 	"github.com/giantswarm/micrologger/loggermeta"
@@ -61,6 +62,10 @@ func New(config Config) (*MicroLogger, error) {
 	}
 
 	return l, nil
+}
+
+func (l *MicroLogger) SetLevel(lvl string) {
+	l.logger = level.NewFilter(l.logger, level.Allow(level.ParseDefault(lvl, level.InfoValue())))
 }
 
 func (l *MicroLogger) Debug(ctx context.Context, message string) {
