@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"strings"
 
 	"github.com/giantswarm/microerror"
 	kitlog "github.com/go-kit/log"
@@ -16,8 +17,10 @@ import (
 )
 
 type Config struct {
-	Caller             kitlog.Valuer
-	IOWriter           io.Writer
+	Caller   kitlog.Valuer
+	IOWriter io.Writer
+	// OutputFormat can be either text or json (default).
+	OutputFormat       string
 	TimestampFormatter kitlog.Valuer
 }
 
@@ -39,7 +42,14 @@ func New(config Config) (*MicroLogger, error) {
 		config.IOWriter = DefaultIOWriter
 	}
 
-	kitLogger := kitlog.NewJSONLogger(kitlog.NewSyncWriter(config.IOWriter))
+	var kitLogger kitlog.Logger
+	switch strings.ToLower(config.OutputFormat) {
+	case "text":
+		kitLogger = kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(config.IOWriter))
+	default:
+		kitLogger = kitlog.NewJSONLogger(kitlog.NewSyncWriter(config.IOWriter))
+	}
+
 	kitLogger = kitlog.With(
 		kitLogger,
 		"caller", config.Caller,
