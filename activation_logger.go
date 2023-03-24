@@ -126,6 +126,10 @@ func (l *activationLogger) LogCtx(ctx context.Context, keyVals ...interface{}) {
 	}
 }
 
+func (l *activationLogger) SetLevel(lvl string) {
+	// Method must exists to comply with Logger interface.
+}
+
 func (l *activationLogger) With(keyVals ...interface{}) Logger {
 	return l.underlying.With(keyVals...)
 }
