@@ -23,6 +23,8 @@ type Logger interface {
 	// may contain additional key-value pairs that are added to the log
 	// issuance, if any.
 	LogCtx(ctx context.Context, keyVals ...interface{})
+	// SetLevel configures log level.
+	SetLevel(lvl string)
 	// With returns a new contextual logger with keyVals appended to those
 	// passed to calls to Log. If logger is also a contextual logger
 	// created by With, keyVals is appended to the existing context.
