@@ -51,11 +51,7 @@ func New(config Config) (*MicroLogger, error) {
 		kitLogger = kitlog.NewJSONLogger(kitlog.NewSyncWriter(config.IOWriter))
 	}
 
-	kitLogger = kitlog.With(
-		kitLogger,
-		"caller", config.Caller,
-		"time", config.TimestampFormatter,
-	)
+	//kitLogger = kitlog.WithSuffix(kitLogger, "caller", kitlog.Caller(8))
 
 	logger := kitlog.LoggerFunc(func(keyVals ...interface{}) error {
 		err := kitLogger.Log(keyVals...)
@@ -76,47 +72,65 @@ func (l *MicroLogger) SetLevel(lvl string) {
 	l.logger = level.NewFilter(l.logger, level.Allow(level.ParseDefault(lvl, level.InfoValue())))
 }
 
-func (l *MicroLogger) Debug(ctx context.Context, message string) {
-	kvs := []interface{}{
-		"level", "debug",
-		"message", message,
-	}
+func (l *MicroLogger) Debug(keyVals ...interface{}) {
+	level.Debug(l.logger).Log(keyVals...)
+}
 
-	level.Debug(l.logger).Log(keyValsWithMeta(ctx, kvs))
+func (l *MicroLogger) DebugCtx(ctx context.Context, keyVals ...interface{}) {
+	l.Debug(keyValsWithMeta(ctx, keyVals)...)
 }
 
 func (l *MicroLogger) Debugf(ctx context.Context, format string, params ...interface{}) {
-	l.Debug(ctx, fmt.Sprintf(format, params...))
+	l.DebugCtx(ctx, "message", fmt.Sprintf(format, params...))
 }
 
-func (l *MicroLogger) Error(ctx context.Context, err error, message string) {
-	var kvs []interface{}
-	if err != nil {
-		kvs = []interface{}{
-			"level", "error",
-			"message", message,
-			"stack", microerror.JSON(err),
-		}
-	} else {
-		kvs = []interface{}{
-			"level", "error",
-			"message", message,
-		}
+func (l *MicroLogger) Error(err error, keyVals ...interface{}) {
+	errKV := []interface{}{
+		"error", microerror.JSON(err),
 	}
+	keyVals = append(keyVals, errKV...)
 
-	level.Error(l.logger).Log(keyValsWithMeta(ctx, kvs))
+	level.Error(l.logger).Log(keyVals...)
+}
+
+func (l *MicroLogger) ErrorCtx(ctx context.Context, err error, keyVals ...interface{}) {
+	l.Error(err, keyValsWithMeta(ctx, keyVals)...)
 }
 
 func (l *MicroLogger) Errorf(ctx context.Context, err error, format string, params ...interface{}) {
-	l.Error(ctx, err, fmt.Sprintf(format, params...))
+	l.ErrorCtx(ctx, err, "message", fmt.Sprintf(format, params...))
+}
+
+func (l *MicroLogger) Info(keyVals ...interface{}) {
+	level.Warn(l.logger).Log(keyVals...)
+}
+
+func (l *MicroLogger) InfoCtx(ctx context.Context, keyVals ...interface{}) {
+	l.Info(keyValsWithMeta(ctx, keyVals)...)
+}
+
+func (l *MicroLogger) Infof(ctx context.Context, format string, params ...interface{}) {
+	l.InfoCtx(ctx, "message", fmt.Sprintf(format, params...))
 }
 
 func (l *MicroLogger) Log(keyVals ...interface{}) {
-	l.logger.Log(processStack(keyVals))
+	l.logger.Log(processStack(keyVals)...)
 }
 
 func (l *MicroLogger) LogCtx(ctx context.Context, keyVals ...interface{}) {
-	l.logger.Log(keyValsWithMeta(ctx, keyVals))
+	l.logger.Log(keyValsWithMeta(ctx, keyVals)...)
+}
+
+func (l *MicroLogger) Warning(keyVals ...interface{}) {
+	level.Warn(l.logger).Log(keyVals...)
+}
+
+func (l *MicroLogger) WarningCtx(ctx context.Context, keyVals ...interface{}) {
+	l.Warning(keyValsWithMeta(ctx, keyVals)...)
+}
+
+func (l *MicroLogger) Warningf(ctx context.Context, format string, params ...interface{}) {
+	l.WarningCtx(ctx, "message", fmt.Sprintf(format, params...))
 }
 
 func (l *MicroLogger) deepCopy() *MicroLogger {
@@ -199,12 +213,4 @@ func processStack(keyVals []interface{}) []interface{} {
 	}
 
 	return keyVals
-}
-
-func (l *MicroLogger) AsSink(verbosity int) logr.LogSink {
-	loggerCopy := l.deepCopy()
-	loggerCopy.verbosity = verbosity
-	return &LogrSink{
-		MicroLogger: loggerCopy,
-	}
 }
