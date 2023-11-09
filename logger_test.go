@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -25,7 +25,6 @@ var update = flag.Bool("update", false, "update .golden files")
 // intentional, they can be updated by providing -update flag for go test.
 //
 //	go test . -run Test_MicroLogger -update
-//
 func Test_MicroLogger(t *testing.T) {
 	testCases := []struct {
 		name              string
@@ -148,13 +147,13 @@ func Test_MicroLogger(t *testing.T) {
 
 			golden := filepath.Join("testdata", normalizeToFileName(tc.name)+".golden")
 			if *update {
-				err := ioutil.WriteFile(golden, actual, 0644) // nolint:gosec
+				err := os.WriteFile(golden, actual, 0644) // nolint:gosec
 				if err != nil {
 					t.Fatal(err)
 				}
 			}
 
-			expected, err := ioutil.ReadFile(golden)
+			expected, err := os.ReadFile(golden)
 			if err != nil {
 				t.Fatal(err)
 			}
