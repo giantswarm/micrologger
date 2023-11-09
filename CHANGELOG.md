@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.1] - 2023-11-09
 
+## [1.1.1] - 2023-11-09
+
 ### Fixed
 
 - Fix circle ci config.
@@ -99,6 +101,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - First release.
 
 [Unreleased]: https://github.com/giantswarm/micrologger/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/giantswarm/micrologger/compare/v1.1.1...v1.1.1
 [1.1.1]: https://github.com/giantswarm/micrologger/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/giantswarm/micrologger/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/giantswarm/micrologger/compare/v0.6.0...v1.0.0
