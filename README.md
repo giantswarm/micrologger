@@ -4,5 +4,7 @@
 
 # micrologger
 
+**:warning: Important: This library has been deprecated in favor of other project's defaults. Please, do not use this library in new projects.**
+
 This is a logging library we use at Giant Swarm for many of our operators and
 microservices.
