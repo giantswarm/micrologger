@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Upgrade to go 1.23.
+- Upgrade github.com/go-logr/logr from 1.3.0 to 1.4.2.
+
 ## [1.1.1] - 2023-11-09
 
 ### Fixed
