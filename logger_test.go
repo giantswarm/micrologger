@@ -120,7 +120,7 @@ func Test_MicroLogger(t *testing.T) {
 			{
 				// Don't flush on purpose. Logs should be
 				// flushed right after they are logged.
-				wCopy := []byte(w.String()) // nolint:gosimple
+				wCopy := w.Bytes()
 				w.Reset()
 				err := json.Indent(w, wCopy, "", "\t")
 				if err != nil {
@@ -147,13 +147,13 @@ func Test_MicroLogger(t *testing.T) {
 
 			golden := filepath.Join("testdata", normalizeToFileName(tc.name)+".golden")
 			if *update {
-				err := os.WriteFile(golden, actual, 0644) // nolint:gosec
+				err := os.WriteFile(golden, actual, 0644) //nolint:gosec
 				if err != nil {
 					t.Fatal(err)
 				}
 			}
 
-			expected, err := os.ReadFile(golden)
+			expected, err := os.ReadFile(golden) //nolint:gosec
 			if err != nil {
 				t.Fatal(err)
 			}
