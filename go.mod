@@ -2,7 +2,7 @@ module github.com/giantswarm/micrologger
 
 go 1.21
 
-toolchain go1.24.3
+toolchain go1.24.4
 
 require (
 	github.com/giantswarm/microerror v0.4.1
