@@ -14,6 +14,12 @@ const (
 )
 
 const (
+	keyMessage = "message"
+
+	levelNameError = "error"
+)
+
+const (
 	levelDebug levelID = 1 << iota
 	levelInfo
 	levelWarning
@@ -22,10 +28,10 @@ const (
 
 var (
 	levelMapping = map[string]levelID{
-		"debug":   levelDebug,
-		"info":    levelInfo,
-		"warning": levelWarning,
-		"error":   levelError,
+		"debug":        levelDebug,
+		"info":         levelInfo,
+		"warning":      levelWarning,
+		levelNameError: levelError,
 	}
 )
 
@@ -84,7 +90,7 @@ func NewActivation(config ActivationLoggerConfig) (Logger, error) {
 }
 
 func (l *activationLogger) Debug(ctx context.Context, message string) {
-	l.LogCtx(ctx, "level", "debug", "message", message)
+	l.LogCtx(ctx, KeyLevel, "debug", keyMessage, message)
 }
 
 func (l *activationLogger) Debugf(ctx context.Context, format string, params ...interface{}) {
@@ -93,9 +99,9 @@ func (l *activationLogger) Debugf(ctx context.Context, format string, params ...
 
 func (l *activationLogger) Error(ctx context.Context, err error, message string) {
 	if err != nil {
-		l.LogCtx(ctx, "level", "error", "message", message, "stack", microerror.JSON(err))
+		l.LogCtx(ctx, KeyLevel, levelNameError, keyMessage, message, "stack", microerror.JSON(err))
 	} else {
-		l.LogCtx(ctx, "level", "error", "message", message)
+		l.LogCtx(ctx, KeyLevel, levelNameError, keyMessage, message)
 	}
 }
 

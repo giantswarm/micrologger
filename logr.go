@@ -26,14 +26,14 @@ func (l *LogrSink) Info(level int, msg string, keysAndValues ...interface{}) {
 		return
 	}
 	keysAndValues = append(keysAndValues, l.getValues("debug")...)
-	l.With(keysAndValues...).Log("message", msg)
+	l.With(keysAndValues...).Log(keyMessage, msg)
 }
 
 func (l *LogrSink) Error(err error, msg string, keysAndValues ...interface{}) {
 	if l.verbosity < 1 {
 		return
 	}
-	keysAndValues = append(keysAndValues, l.getValues("error")...)
+	keysAndValues = append(keysAndValues, l.getValues(levelNameError)...)
 	l.With(keysAndValues...).Errorf(context.Background(), err, msg)
 }
 
@@ -51,7 +51,7 @@ func (l *LogrSink) WithName(name string) logr.LogSink {
 
 func (l *LogrSink) getValues(level string) []interface{} {
 	return []interface{}{
-		"level",
+		KeyLevel,
 		level,
 		"name",
 		strings.Join(l.names, "."),
