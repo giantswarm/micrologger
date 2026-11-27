@@ -55,8 +55,8 @@ func New(config Config) (*MicroLogger, error) {
 
 func (l *MicroLogger) Debug(ctx context.Context, message string) {
 	kvs := []interface{}{
-		"level", "debug",
-		"message", message,
+		KeyLevel, "debug",
+		keyMessage, message,
 	}
 
 	l.log(keyValsWithMeta(ctx, kvs))
@@ -70,14 +70,14 @@ func (l *MicroLogger) Error(ctx context.Context, err error, message string) {
 	var kvs []interface{}
 	if err != nil {
 		kvs = []interface{}{
-			"level", "error",
-			"message", message,
+			KeyLevel, levelNameError,
+			keyMessage, message,
 			"stack", microerror.JSON(err),
 		}
 	} else {
 		kvs = []interface{}{
-			"level", "error",
-			"message", message,
+			KeyLevel, levelNameError,
+			keyMessage, message,
 		}
 	}
 
